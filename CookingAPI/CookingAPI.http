@@ -1,0 +1,131 @@
+@CookingAPI_HostAddress = http://localhost:5261
+
+GET http://localhost:5261/api/receta
+Accept: application/json
+
+###
+
+GET http://localhost:5261/api/receta/1
+Accept: application/json
+
+###
+
+
+POST http://localhost:5261/api/ingrediente
+Content-Type: application/json
+{
+        "nombre": "Huevos",
+        "tipo": "OrigenAnimal",
+        "alergenos": ["Huevo"]
+}
+###
+
+POST http://localhost:5261/api/ingrediente
+Content-Type: application/json
+{
+        "nombre": "Patatas",
+        "tipo": "Vegetal",
+        "alergenos": []
+}
+###
+
+POST http://localhost:5261/api/ingrediente
+Content-Type: application/json
+{
+        "nombre": "Cebolla",
+        "tipo": "Vegetal",
+        "alergenos": []
+}
+###
+
+POST http://localhost:5261/api/ingrediente
+Content-Type: application/json
+{
+        "nombre": "Sal",
+        "tipo": "Vegetal",
+        "alergenos": []
+}
+###
+
+POST http://localhost:5261/api/ingrediente
+Content-Type: application/json
+{
+        "nombre": "Aceite de oliva",
+        "tipo": "Vegetal",
+        "alergenos": []
+}
+###
+
+POST http://localhost:5261/api/ingrediente
+Content-Type: application/json
+{
+        "nombre": "Parmesano",
+        "tipo": "OrigenAnimal",
+        "alergenos": ["Leche"]
+ }
+
+
+
+###
+
+POST http://localhost:5261/api/receta
+Content-Type: application/json
+{
+    "nombre": "Tortilla Española",
+    "tipoDieta": "Vegetariana",
+    "raciones": 4,
+    "elaboracion": "Batir los huevos, añadir patatas y cebolla, y cocinar.",
+    "presentacion": "Servir caliente, decorada con perejil.",
+    "tipoReceta": "Entrante",
+    "tiempo": 20,
+    "listaIngrediente": {
+        "4": 4.0,   
+        "5": 300.0, 
+        "6": 100.0, 
+        "7": 10.0,  
+        "8": 50.0
+    }
+}
+
+###
+
+DELETE http://localhost:5261/api/receta/1
+
+###
+
+PUT http://localhost:5261/api/receta/1
+Content-Type: application/json
+{
+    "codReceta": 1,
+    "tipoDieta": "Omnivora",
+    "nombre": "Ensalada César",
+    "raciones": 2,
+    "elaboracion": "Mezclar lechuga, pollo y aderezo César.",
+    "presentacion": "Servir fría con queso parmesano.",
+    "tipoReceta": "Entrante",
+    "tiempo": 15,
+    "listaIngrediente": {
+        "1": 150.0,  // 150g de lechuga
+        "2": 100.0,  // 100g de pollo
+        "3": 50.0    // 50g de queso parmesano
+    }
+}
+
+###
+
+GET http://localhost:5261/api/receta/search?tiposDietas=Vegetariana&tiposDietas=Vegana&ingredientesIds=1,2
+Accept: application/json
+
+###
+
+
+
+###
+
+
+
+###
+
+
+
+###
