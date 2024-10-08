@@ -1,9 +1,12 @@
 using CookingAPI.DataModel;
+using CookingAPI.ErrorHandler;
 using CookingAPI.Interfaces;
 using CookingAPI.Repositorio;
 using CookingAPI.Respositorio;
 using CookingAPI.Services;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Events;
 using System.Text.Json.Serialization;
 
 namespace CookingAPI
@@ -13,6 +16,22 @@ namespace CookingAPI
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Configuración de Serilog
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning) // Ignora logs de Microsoft por debajo de Warning
+                .WriteTo.Console() // También escribe en la consola
+                .WriteTo.File("logs/log-.txt", // Ruta y nombre del archivo
+                              rollingInterval: RollingInterval.Day, // Crear un nuevo archivo cada día
+                              shared: true, // Permitir acceso concurrente
+                              outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}") // Estructura de salida
+                .CreateLogger();
+
+            builder.Host.UseSerilog();
+
+            // Configurar el logging en toda la aplicación
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole(); // Agrega el logger de consola
 
             // Configurar la cadena de conexión para el contexto de la base de datos
             builder.Services.AddDbContext<CookingModel>(options =>
@@ -44,18 +63,29 @@ namespace CookingAPI
 
             var app = builder.Build();
 
-            // Verificar y aplicar las migraciones de la base de datos al iniciar la aplicación
+            // Añadir el middleware de manejo de errores
+            app.UseMiddleware<ErrorHandlingMiddleware>();
+
+            // Obtener el logger global y pasar a las migraciones
+            var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+            // Aplicar migraciones de base de datos con el logger global
+            // Crear un nuevo scope para los servicios
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
+
                 try
                 {
                     var context = services.GetRequiredService<CookingModel>();
-                    context.Database.Migrate(); // Aplica las migraciones pendientes y crea la base de datos si no existe
+                    logger.LogInformation("Iniciando migraciones de la base de datos...");
+
+                    context.Database.Migrate(); // Aplica las migraciones pendientes
+                    logger.LogInformation("Migraciones de la base de datos aplicadas con éxito.");
                 }
                 catch (Exception ex)
                 {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    // Registro detallado en caso de excepción
                     logger.LogError(ex, "Error al aplicar las migraciones de la base de datos.");
                 }
             }
@@ -70,7 +100,9 @@ namespace CookingAPI
             app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
+            logger.LogInformation("API en funcionamiento...");
             app.Run();
         }
+
     }
 }

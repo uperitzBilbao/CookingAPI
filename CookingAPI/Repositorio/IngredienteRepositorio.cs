@@ -6,9 +6,13 @@ namespace CookingAPI.Repositorio
 {
     public class IngredienteRepositorio : Repositorio<Ingrediente>, IIngredienteRepositorio
     {
-        public IngredienteRepositorio(CookingModel context) : base(context)
+        private readonly ILogger<IngredienteRepositorio> _logger;
+
+        public IngredienteRepositorio(CookingModel context, ILogger<IngredienteRepositorio> logger) : base(context, logger)
         {
+            _logger = logger;
         }
+
 
     }
 }

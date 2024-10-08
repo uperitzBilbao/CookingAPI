@@ -9,10 +9,12 @@ namespace CookingAPI.Controllers
     public class IngredienteController : ControllerBase
     {
         private readonly IngredienteRepositorio _ingredienteRepositorio;
+        private readonly ILogger<IngredienteController> _logger;
 
-        public IngredienteController(IngredienteRepositorio ingredienteRepositorio)
+        public IngredienteController(IngredienteRepositorio ingredienteRepositorio, ILogger<IngredienteController> logger)
         {
             _ingredienteRepositorio = ingredienteRepositorio;
+            _logger = logger;
         }
 
         // GET: api/ingrediente
@@ -35,13 +37,17 @@ namespace CookingAPI.Controllers
             return Ok(ingrediente);
         }
 
-
-
         // POST: api/ingrediente
         [HttpPost]
         public ActionResult<Ingrediente> CreateIngrediente([FromBody] Ingrediente ingrediente)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState); // Manejo de errores de validación
+            }
+
             _ingredienteRepositorio.Add(ingrediente);
+            _logger.LogInformation($"Ingrediente creado: {ingrediente.Nombre} con ID {ingrediente.IdIngrediente}.");
             return CreatedAtAction(nameof(Get), new { id = ingrediente.IdIngrediente }, ingrediente);
         }
 
@@ -49,6 +55,11 @@ namespace CookingAPI.Controllers
         [HttpPut("{id}")]
         public IActionResult Update(int id, [FromBody] Ingrediente ingrediente)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState); // Manejo de errores de validación
+            }
+
             var existingIngrediente = _ingredienteRepositorio.Get(id);
             if (existingIngrediente == null)
             {
@@ -56,6 +67,7 @@ namespace CookingAPI.Controllers
             }
 
             _ingredienteRepositorio.Update(ingrediente);
+            _logger.LogInformation($"Ingrediente actualizado: {ingrediente.Nombre} con ID {ingrediente.IdIngrediente}.");
             return NoContent();
         }
 
@@ -70,6 +82,7 @@ namespace CookingAPI.Controllers
             }
 
             _ingredienteRepositorio.Delete(id);
+            _logger.LogInformation($"Ingrediente eliminado con ID {id}.");
             return NoContent();
         }
     }

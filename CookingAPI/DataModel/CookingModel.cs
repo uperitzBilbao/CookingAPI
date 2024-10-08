@@ -5,9 +5,11 @@ namespace CookingAPI.DataModel
 {
     public class CookingModel : DbContext
     {
+        private readonly ILogger<CookingModel> _logger;
 
-        public CookingModel(DbContextOptions<CookingModel> options) : base(options)
+        public CookingModel(DbContextOptions<CookingModel> options, ILogger<CookingModel> logger) : base(options)
         {
+            _logger = logger;
         }
 
         public DbSet<Ingrediente> Ingredientes { get; set; }
@@ -50,50 +52,51 @@ namespace CookingAPI.DataModel
 
             // Seed data para los enums
             modelBuilder.Entity<TipoDieta>().HasData(
-                    new TipoDieta { IdTipoDieta = 1, Nombre = "Vegana" },
-                    new TipoDieta { IdTipoDieta = 2, Nombre = "Pescetariana" },
-                    new TipoDieta { IdTipoDieta = 3, Nombre = "Lactovegetariana" },
-                    new TipoDieta { IdTipoDieta = 4, Nombre = "Lactoovovegetariana" },
-                    new TipoDieta { IdTipoDieta = 5, Nombre = "Ovovegetariana" },
-                    new TipoDieta { IdTipoDieta = 6, Nombre = "Vegetariana" },
-                    new TipoDieta { IdTipoDieta = 7, Nombre = "Omnívora" }
-                );
+                new TipoDieta { IdTipoDieta = 1, Nombre = "Vegana" },
+                new TipoDieta { IdTipoDieta = 2, Nombre = "Pescetariana" },
+                new TipoDieta { IdTipoDieta = 3, Nombre = "Lactovegetariana" },
+                new TipoDieta { IdTipoDieta = 4, Nombre = "Lactoovovegetariana" },
+                new TipoDieta { IdTipoDieta = 5, Nombre = "Ovovegetariana" },
+                new TipoDieta { IdTipoDieta = 6, Nombre = "Vegetariana" },
+                new TipoDieta { IdTipoDieta = 7, Nombre = "Omnívora" }
+            );
 
             modelBuilder.Entity<TipoIngrediente>().HasData(
-                    new TipoIngrediente { IdTipoIngrediente = 1, Nombre = "Vegetal" },
-                    new TipoIngrediente { IdTipoIngrediente = 2, Nombre = "Carne" },
-                    new TipoIngrediente { IdTipoIngrediente = 3, Nombre = "Pescado" },
-                    new TipoIngrediente { IdTipoIngrediente = 4, Nombre = "Origen animal" },
-                    new TipoIngrediente { IdTipoIngrediente = 5, Nombre = "Condimento" }
-                );
+                new TipoIngrediente { IdTipoIngrediente = 1, Nombre = "Vegetal" },
+                new TipoIngrediente { IdTipoIngrediente = 2, Nombre = "Carne" },
+                new TipoIngrediente { IdTipoIngrediente = 3, Nombre = "Pescado" },
+                new TipoIngrediente { IdTipoIngrediente = 4, Nombre = "Origen animal" },
+                new TipoIngrediente { IdTipoIngrediente = 5, Nombre = "Condimento" }
+            );
 
             modelBuilder.Entity<TipoAlergeno>().HasData(
-                    new TipoAlergeno { IdTipoAlergeno = 1, Nombre = "Gluten" },
-                    new TipoAlergeno { IdTipoAlergeno = 2, Nombre = "Crustáceos" },
-                    new TipoAlergeno { IdTipoAlergeno = 3, Nombre = "Huevos" },
-                    new TipoAlergeno { IdTipoAlergeno = 4, Nombre = "Pescado" },
-                    new TipoAlergeno { IdTipoAlergeno = 5, Nombre = "Cacahuetes" },
-                    new TipoAlergeno { IdTipoAlergeno = 6, Nombre = "Soja" },
-                    new TipoAlergeno { IdTipoAlergeno = 7, Nombre = "Leche" },
-                    new TipoAlergeno { IdTipoAlergeno = 8, Nombre = "Frutos con cáscara" },
-                    new TipoAlergeno { IdTipoAlergeno = 9, Nombre = "Apio" },
-                    new TipoAlergeno { IdTipoAlergeno = 10, Nombre = "Mostaza" },
-                    new TipoAlergeno { IdTipoAlergeno = 11, Nombre = "Sésamo" },
-                    new TipoAlergeno { IdTipoAlergeno = 12, Nombre = "Sulfitos" },
-                    new TipoAlergeno { IdTipoAlergeno = 13, Nombre = "Altramuces" },
-                    new TipoAlergeno { IdTipoAlergeno = 14, Nombre = "Moluscos" }
-                );
+                new TipoAlergeno { IdTipoAlergeno = 1, Nombre = "Gluten" },
+                new TipoAlergeno { IdTipoAlergeno = 2, Nombre = "Crustáceos" },
+                new TipoAlergeno { IdTipoAlergeno = 3, Nombre = "Huevos" },
+                new TipoAlergeno { IdTipoAlergeno = 4, Nombre = "Pescado" },
+                new TipoAlergeno { IdTipoAlergeno = 5, Nombre = "Cacahuetes" },
+                new TipoAlergeno { IdTipoAlergeno = 6, Nombre = "Soja" },
+                new TipoAlergeno { IdTipoAlergeno = 7, Nombre = "Leche" },
+                new TipoAlergeno { IdTipoAlergeno = 8, Nombre = "Frutos con cáscara" },
+                new TipoAlergeno { IdTipoAlergeno = 9, Nombre = "Apio" },
+                new TipoAlergeno { IdTipoAlergeno = 10, Nombre = "Mostaza" },
+                new TipoAlergeno { IdTipoAlergeno = 11, Nombre = "Sésamo" },
+                new TipoAlergeno { IdTipoAlergeno = 12, Nombre = "Sulfitos" },
+                new TipoAlergeno { IdTipoAlergeno = 13, Nombre = "Altramuces" },
+                new TipoAlergeno { IdTipoAlergeno = 14, Nombre = "Moluscos" }
+            );
 
             modelBuilder.Entity<TipoElaboracion>().HasData(
-                    new TipoElaboracion { IdTipoElaboracion = 1, Nombre = "Entrante" },
-                    new TipoElaboracion { IdTipoElaboracion = 2, Nombre = "Primer Plato" },
-                    new TipoElaboracion { IdTipoElaboracion = 3, Nombre = "Segundo Plato" },
-                    new TipoElaboracion { IdTipoElaboracion = 4, Nombre = "Postre" },
-                    new TipoElaboracion { IdTipoElaboracion = 5, Nombre = "Aperitivo" },
-                    new TipoElaboracion { IdTipoElaboracion = 6, Nombre = "Bebida" },
-                    new TipoElaboracion { IdTipoElaboracion = 7, Nombre = "Salsa" },
-                    new TipoElaboracion { IdTipoElaboracion = 8, Nombre = "Guarnición" }
-                );
+                new TipoElaboracion { IdTipoElaboracion = 1, Nombre = "Entrante" },
+                new TipoElaboracion { IdTipoElaboracion = 2, Nombre = "Primer Plato" },
+                new TipoElaboracion { IdTipoElaboracion = 3, Nombre = "Segundo Plato" },
+                new TipoElaboracion { IdTipoElaboracion = 4, Nombre = "Postre" },
+                new TipoElaboracion { IdTipoElaboracion = 5, Nombre = "Aperitivo" },
+                new TipoElaboracion { IdTipoElaboracion = 6, Nombre = "Bebida" },
+                new TipoElaboracion { IdTipoElaboracion = 7, Nombre = "Salsa" },
+                new TipoElaboracion { IdTipoElaboracion = 8, Nombre = "Guarnición" }
+            );
+
             // Seed data para Ingredientes
             modelBuilder.Entity<Ingrediente>().HasData(
                 new Ingrediente { IdIngrediente = 1, Nombre = "Pasta", IdTipoIngrediente = 1 },
@@ -119,14 +122,11 @@ namespace CookingAPI.DataModel
                 new RecetaIngrediente { IdReceta = 1, IdIngrediente = 3, Cantidad = 1 },    // Sal
                 new RecetaIngrediente { IdReceta = 2, IdIngrediente = 4, Cantidad = 100 }, // Lechuga
                 new RecetaIngrediente { IdReceta = 2, IdIngrediente = 5, Cantidad = 150 }, // Tomate
-                new RecetaIngrediente { IdReceta = 2, IdIngrediente = 6, Cantidad = 100 }, // Pepino
-                new RecetaIngrediente { IdReceta = 2, IdIngrediente = 7, Cantidad = 50 },  // Zanahoria
-                new RecetaIngrediente { IdReceta = 2, IdIngrediente = 8, Cantidad = 2 }    // Aceite de oliva
+                new RecetaIngrediente { IdReceta = 2, IdIngrediente = 6, Cantidad = 100 }  // Pepino
             );
 
-            modelBuilder.Entity<IngredienteAlergeno>().HasData(
-                new IngredienteAlergeno { IdIngrediente = 1, IdTipoAlergeno = 1 } // Pasta - Gluten
-            );
+            // Log the database initialization
+            _logger.LogInformation("CookingModel inicializado y cargando datos.");
         }
     }
 }
