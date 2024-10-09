@@ -1,6 +1,6 @@
 ﻿using CookingAPI.DataModel;
+using CookingAPI.Interfaces;
 using CookingAPI.Models;
-using CookingAPI.Respositorio;
 
 namespace CookingAPI.Repositorio
 {

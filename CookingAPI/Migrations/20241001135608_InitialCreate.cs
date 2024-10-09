@@ -148,6 +148,20 @@ namespace CookingAPI.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+            name: "Usuarios",
+            columns: table => new
+            {
+                Id = table.Column<int>(nullable: false)
+                    .Annotation("SqlServer:Identity", "1, 1"),
+                Username = table.Column<string>(nullable: false),
+                Password = table.Column<string>(nullable: false)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_Usuarios", x => x.Id);
+            });
+
             migrationBuilder.InsertData(
                 table: "Ingredientes",
                 columns: new[] { "IdIngrediente", "IdTipoIngrediente", "Nombre" },
@@ -291,6 +305,9 @@ namespace CookingAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Recetas");
+
+            migrationBuilder.DropTable(
+                name: "Usuarios");
         }
     }
 }

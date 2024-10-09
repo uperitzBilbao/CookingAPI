@@ -1,4 +1,5 @@
 ﻿using CookingAPI.DataModel;
+using CookingAPI.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace CookingAPI.Repositorio

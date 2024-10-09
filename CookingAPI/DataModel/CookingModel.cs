@@ -19,6 +19,7 @@ namespace CookingAPI.DataModel
         public DbSet<TipoAlergeno> TiposAlergeno { get; set; }
         public DbSet<TipoIngrediente> TiposIngrediente { get; set; }
         public DbSet<TipoElaboracion> TiposElaboracion { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

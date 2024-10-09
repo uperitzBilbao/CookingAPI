@@ -1,4 +1,4 @@
-﻿namespace CookingAPI.Repositorio
+﻿namespace CookingAPI.Interfaces
 {
     public interface IRepositorio<TEntity> where TEntity : class
     {

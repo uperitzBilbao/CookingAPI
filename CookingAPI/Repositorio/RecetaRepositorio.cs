@@ -1,4 +1,5 @@
 ﻿using CookingAPI.DataModel;
+using CookingAPI.Interfaces;
 using CookingAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,12 +7,12 @@ namespace CookingAPI.Repositorio
 {
     public class RecetaRepositorio : Repositorio<Receta>, IRecetaRepositorio
     {
-        // Logger para registrar eventos
+
         private readonly ILogger<RecetaRepositorio> _logger;
 
-        // Constructor que acepta un logger
+
         public RecetaRepositorio(CookingModel context, ILogger<RecetaRepositorio> logger)
-            : base(context, logger) // Pasamos el logger al constructor base
+            : base(context, logger)
         {
             _logger = logger;
         }

@@ -2,11 +2,13 @@ using CookingAPI.DataModel;
 using CookingAPI.ErrorHandler;
 using CookingAPI.Interfaces;
 using CookingAPI.Repositorio;
-using CookingAPI.Respositorio;
 using CookingAPI.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace CookingAPI
@@ -42,16 +44,16 @@ namespace CookingAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
+
             // Registrar el servicio RecetaService y IngredienteService
             builder.Services.AddScoped<IRecetaService, RecetaService>();
             builder.Services.AddScoped<IIngredienteService, IngredienteService>();
 
             // Registrar los repositorios
-            builder.Services.AddScoped<IRecetaRepositorio, RecetaRepositorio>(); // Si usas interfaz
-            builder.Services.AddScoped<RecetaRepositorio>(); // Si no usas interfaz
+            builder.Services.AddScoped<IRecetaRepositorio, RecetaRepositorio>();
 
             builder.Services.AddScoped<IIngredienteRepositorio, IngredienteRepositorio>();
-            builder.Services.AddScoped<IngredienteRepositorio>();
 
             // Configurar el serializador para usar nombres de enums y preservar referencias
             builder.Services.AddControllers()
@@ -60,6 +62,29 @@ namespace CookingAPI
                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
+
+            // Configurar autenticación JWT
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                    ValidAudience = builder.Configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(key)
+                };
+            });
+
+            builder.Services.AddAuthorization();
 
             var app = builder.Build();
 
@@ -90,6 +115,8 @@ namespace CookingAPI
                 }
             }
 
+
+
             // Configurar la tubería de solicitudes HTTP.
             if (app.Environment.IsDevelopment())
             {
@@ -98,6 +125,7 @@ namespace CookingAPI
             }
 
             app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
             logger.LogInformation("API en funcionamiento...");
