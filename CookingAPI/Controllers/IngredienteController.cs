@@ -1,9 +1,11 @@
 ﻿using CookingAPI.Models;
 using CookingAPI.Repositorio;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CookingAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class IngredienteController : ControllerBase

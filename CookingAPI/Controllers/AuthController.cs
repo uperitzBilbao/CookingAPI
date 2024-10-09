@@ -1,6 +1,10 @@
 ﻿using CookingAPI.Interfaces;
 using CookingAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace CookingAPI.Controllers
 {
@@ -9,10 +13,12 @@ namespace CookingAPI.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUsuarioRepositorio _usuarioRepositorio;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(IUsuarioRepositorio usuarioRepositorio)
+        public AuthController(IUsuarioRepositorio usuarioRepositorio, IConfiguration configuration)
         {
             _usuarioRepositorio = usuarioRepositorio;
+            _configuration = configuration;
         }
 
         [HttpPost("login")]
@@ -20,8 +26,29 @@ namespace CookingAPI.Controllers
         {
             if (_usuarioRepositorio.ValidateCredentials(request.Username, request.Password))
             {
-                // Generar y devolver el token JWT aquí
-                return Ok("Token generado"); // Cambia esto por el token real
+                // Generar el token JWT
+                var claims = new[]
+                {
+                    new Claim(ClaimTypes.Name, request.Username)
+                };
+
+                // Obtén la clave y otros valores de la configuración
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                var token = new JwtSecurityToken(
+                    issuer: _configuration["Jwt:Issuer"],
+                    audience: _configuration["Jwt:Audience"],
+                    claims: claims,
+                    expires: DateTime.Now.AddMinutes(90),
+                    signingCredentials: creds);
+
+                // Devolver el token en la respuesta
+                var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+                return Ok(new
+                {
+                    Token = tokenString
+                });
             }
             return Unauthorized();
         }
@@ -38,8 +65,6 @@ namespace CookingAPI.Controllers
 
             return CreatedAtAction(nameof(Login), new { username = nuevoUsuario.Username }, nuevoUsuario);
         }
-
-
     }
 
     public class LoginRequest
