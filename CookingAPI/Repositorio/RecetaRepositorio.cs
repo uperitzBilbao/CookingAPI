@@ -1,5 +1,5 @@
 ﻿using CookingAPI.DataModel;
-using CookingAPI.Interfaces;
+using CookingAPI.InterfacesRepo;
 using CookingAPI.Models;
 using Microsoft.EntityFrameworkCore;
 

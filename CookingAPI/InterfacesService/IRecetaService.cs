@@ -1,16 +1,16 @@
 ﻿using CookingAPI.Models;
 
-namespace CookingAPI.Interfaces
+namespace CookingAPI.InterfacesService
 {
     public interface IRecetaService
     {
-        List<Receta> GetAll();
+        IEnumerable<Receta> GetAll();
         Receta? Get(int id);
-        List<Receta> GetAllCompleto();
+        IEnumerable<Receta> GetAllCompleto();
         Receta? GetCompleto(int id);
         void Add(Receta receta);
         void Update(int id, Receta updatedReceta);
         void Delete(int id);
-        List<Receta> Search(string? nombre, int? tipoDietaId, int? tipoAlergenoId);
+        IEnumerable<Receta> SearchReceta(string? nombre, int? tipoDietaId, int? tipoAlergenoId);
     }
 }

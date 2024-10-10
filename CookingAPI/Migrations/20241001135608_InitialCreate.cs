@@ -162,6 +162,30 @@ namespace CookingAPI.Migrations
                 table.PrimaryKey("PK_Usuarios", x => x.Id);
             });
 
+            migrationBuilder.CreateTable(
+            name: "UsuarioRecetas",
+            columns: table => new
+            {
+                UsuarioId = table.Column<int>(nullable: false),
+                RecetaId = table.Column<int>(nullable: false)
+            },
+            constraints: table =>
+            {
+                table.PrimaryKey("PK_UsuarioRecetas", x => new { x.UsuarioId, x.RecetaId });
+                table.ForeignKey(
+                    name: "FK_UsuarioRecetas_Usuarios_UsuarioId",
+                    column: x => x.UsuarioId,
+                    principalTable: "Usuarios",
+                    principalColumn: "Id",
+                    onDelete: ReferentialAction.Cascade);
+                table.ForeignKey(
+                    name: "FK_UsuarioRecetas_Recetas_RecetaId",
+                    column: x => x.RecetaId,
+                    principalTable: "Recetas",
+                    principalColumn: "IdReceta",
+                    onDelete: ReferentialAction.Cascade);
+            });
+
             migrationBuilder.InsertData(
                 table: "Ingredientes",
                 columns: new[] { "IdIngrediente", "IdTipoIngrediente", "Nombre" },
@@ -308,6 +332,9 @@ namespace CookingAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Usuarios");
+
+            migrationBuilder.DropTable(
+                name: "UsuarioRecetas");
         }
     }
 }

@@ -20,6 +20,7 @@ namespace CookingAPI.DataModel
         public DbSet<TipoIngrediente> TiposIngrediente { get; set; }
         public DbSet<TipoElaboracion> TiposElaboracion { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<UsuarioReceta> UsuarioRecetas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -50,6 +51,19 @@ namespace CookingAPI.DataModel
                 .HasOne(ia => ia.TipoAlergeno)
                 .WithMany()
                 .HasForeignKey(ia => ia.IdTipoAlergeno);
+
+            modelBuilder.Entity<UsuarioReceta>()
+            .HasKey(ur => new { ur.UsuarioId, ur.RecetaId });
+
+            modelBuilder.Entity<UsuarioReceta>()
+                .HasOne(ur => ur.Usuario)
+                .WithMany(u => u.UsuarioRecetas)
+                .HasForeignKey(ur => ur.UsuarioId);
+
+            modelBuilder.Entity<UsuarioReceta>()
+                .HasOne(ur => ur.Receta)
+                .WithMany(r => r.UsuarioRecetas)
+                .HasForeignKey(ur => ur.RecetaId);
 
             // Seed data para los enums
             modelBuilder.Entity<TipoDieta>().HasData(

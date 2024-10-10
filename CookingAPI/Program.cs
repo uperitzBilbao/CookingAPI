@@ -1,6 +1,7 @@
 using CookingAPI.DataModel;
 using CookingAPI.ErrorHandler;
-using CookingAPI.Interfaces;
+using CookingAPI.InterfacesRepo;
+using CookingAPI.InterfacesService;
 using CookingAPI.Repositorio;
 using CookingAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -46,14 +47,16 @@ namespace CookingAPI
 
             builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
 
-            // Registrar el servicio RecetaService y IngredienteService
+
+            // Registro de repositorios
+            builder.Services.AddScoped<IRecetaRepositorio, RecetaRepositorio>();
+            builder.Services.AddScoped<IIngredienteRepositorio, IngredienteRepositorio>();
+
+
+            // Registro de servicios 
             builder.Services.AddScoped<IRecetaService, RecetaService>();
             builder.Services.AddScoped<IIngredienteService, IngredienteService>();
 
-            // Registrar los repositorios
-            builder.Services.AddScoped<IRecetaRepositorio, RecetaRepositorio>();
-
-            builder.Services.AddScoped<IIngredienteRepositorio, IngredienteRepositorio>();
 
             // Configurar el serializador para usar nombres de enums y preservar referencias
             builder.Services.AddControllers()

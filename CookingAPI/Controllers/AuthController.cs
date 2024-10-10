@@ -1,4 +1,4 @@
-﻿using CookingAPI.Interfaces;
+﻿using CookingAPI.InterfacesRepo;
 using CookingAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -33,7 +33,7 @@ namespace CookingAPI.Controllers
                 };
 
                 // Obtén la clave y otros valores de la configuración
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration[key: "Jwt:Key"]));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
                 var token = new JwtSecurityToken(
                     issuer: _configuration["Jwt:Issuer"],

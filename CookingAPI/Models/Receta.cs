@@ -21,6 +21,9 @@ namespace CookingAPI.Models
         public int TiempoMinutos { get; set; }
 
         public List<RecetaIngrediente> RecetaIngredientes { get; set; } = new List<RecetaIngrediente>();
+
+        // Relación con UsuarioReceta
+        public virtual ICollection<UsuarioReceta> UsuarioRecetas { get; set; } = new List<UsuarioReceta>();
     }
 
 

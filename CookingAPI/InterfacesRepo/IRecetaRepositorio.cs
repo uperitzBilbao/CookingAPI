@@ -1,6 +1,6 @@
 ﻿using CookingAPI.Models;
 
-namespace CookingAPI.Interfaces
+namespace CookingAPI.InterfacesRepo
 {
     public interface IRecetaRepositorio : IRepositorio<Receta>
     {

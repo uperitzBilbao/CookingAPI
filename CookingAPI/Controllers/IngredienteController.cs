@@ -1,5 +1,5 @@
 ﻿using CookingAPI.Models;
-using CookingAPI.Repositorio;
+using CookingAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,12 +10,12 @@ namespace CookingAPI.Controllers
     [Route("api/[controller]")]
     public class IngredienteController : ControllerBase
     {
-        private readonly IngredienteRepositorio _ingredienteRepositorio;
+        private readonly IngredienteService _ingredienteService;
         private readonly ILogger<IngredienteController> _logger;
 
-        public IngredienteController(IngredienteRepositorio ingredienteRepositorio, ILogger<IngredienteController> logger)
+        public IngredienteController(IngredienteService ingredienteService, ILogger<IngredienteController> logger)
         {
-            _ingredienteRepositorio = ingredienteRepositorio;
+            _ingredienteService = ingredienteService;
             _logger = logger;
         }
 
@@ -23,7 +23,7 @@ namespace CookingAPI.Controllers
         [HttpGet]
         public ActionResult<List<Ingrediente>> GetAll()
         {
-            var ingredientes = _ingredienteRepositorio.GetAll();
+            var ingredientes = _ingredienteService.GetAll();
             return Ok(ingredientes);
         }
 
@@ -31,7 +31,7 @@ namespace CookingAPI.Controllers
         [HttpGet("{id}")]
         public ActionResult<Ingrediente> Get(int id)
         {
-            var ingrediente = _ingredienteRepositorio.Get(id);
+            var ingrediente = _ingredienteService.Get(id);
             if (ingrediente == null)
             {
                 return NotFound();
@@ -48,7 +48,7 @@ namespace CookingAPI.Controllers
                 return BadRequest(ModelState); // Manejo de errores de validación
             }
 
-            _ingredienteRepositorio.Add(ingrediente);
+            _ingredienteService.Add(ingrediente);
             _logger.LogInformation($"Ingrediente creado: {ingrediente.Nombre} con ID {ingrediente.IdIngrediente}.");
             return CreatedAtAction(nameof(Get), new { id = ingrediente.IdIngrediente }, ingrediente);
         }
@@ -62,13 +62,13 @@ namespace CookingAPI.Controllers
                 return BadRequest(ModelState); // Manejo de errores de validación
             }
 
-            var existingIngrediente = _ingredienteRepositorio.Get(id);
+            var existingIngrediente = _ingredienteService.Get(id);
             if (existingIngrediente == null)
             {
                 return NotFound();
             }
 
-            _ingredienteRepositorio.Update(ingrediente);
+            _ingredienteService.Update(id, ingrediente);
             _logger.LogInformation($"Ingrediente actualizado: {ingrediente.Nombre} con ID {ingrediente.IdIngrediente}.");
             return NoContent();
         }
@@ -77,13 +77,13 @@ namespace CookingAPI.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var ingrediente = _ingredienteRepositorio.Get(id);
+            var ingrediente = _ingredienteService.Get(id);
             if (ingrediente == null)
             {
                 return NotFound();
             }
 
-            _ingredienteRepositorio.Delete(id);
+            _ingredienteService.Delete(id);
             _logger.LogInformation($"Ingrediente eliminado con ID {id}.");
             return NoContent();
         }

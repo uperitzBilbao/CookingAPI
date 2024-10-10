@@ -1,5 +1,5 @@
 ﻿using CookingAPI.DataModel;
-using CookingAPI.Interfaces;
+using CookingAPI.InterfacesRepo;
 using Microsoft.EntityFrameworkCore;
 
 namespace CookingAPI.Repositorio
@@ -62,13 +62,21 @@ namespace CookingAPI.Repositorio
             }
         }
 
-        public void Update(TEntity entity)
+        public void Update(int id, TEntity entity)
         {
             try
             {
-                _logger.LogInformation($"Actualizando entidad de tipo {typeof(TEntity).Name}");
-                _dbSet.Update(entity);
-                _context.SaveChanges();
+                if (_dbSet.Find(id) == null)
+                {
+                    _logger.LogInformation($"No existe el id {typeof(TEntity).Name}");
+                }
+                else
+                {
+                    _logger.LogInformation($"Actualizando entidad de tipo {typeof(TEntity).Name}");
+                    _dbSet.Update(entity);
+                    _context.SaveChanges();
+                }
+
             }
             catch (Exception ex)
             {

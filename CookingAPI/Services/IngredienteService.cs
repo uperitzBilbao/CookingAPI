@@ -1,5 +1,6 @@
 ﻿using CookingAPI.DataModel;
-using CookingAPI.Interfaces;
+using CookingAPI.InterfacesRepo;
+using CookingAPI.InterfacesService;
 using CookingAPI.Models;
 
 namespace CookingAPI.Services
@@ -8,11 +9,13 @@ namespace CookingAPI.Services
     {
         private readonly CookingModel _context;
         private readonly ILogger<IngredienteService> _logger;
+        private readonly IIngredienteRepositorio _ingredienteRepositorio;
 
-        public IngredienteService(CookingModel context, ILogger<IngredienteService> logger)
+        public IngredienteService(IIngredienteRepositorio ingredienteRepositorio, CookingModel context, ILogger<IngredienteService> logger)
         {
             _context = context;
             _logger = logger;
+            _ingredienteRepositorio = ingredienteRepositorio;
         }
 
         public List<Ingrediente> GetAll()

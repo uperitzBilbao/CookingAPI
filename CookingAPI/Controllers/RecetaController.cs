@@ -1,5 +1,5 @@
-﻿using CookingAPI.Models;
-using CookingAPI.Repositorio;
+﻿using CookingAPI.InterfacesService;
+using CookingAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,12 +10,12 @@ namespace CookingAPI.Controllers
     [ApiController]
     public class RecetaController : ControllerBase
     {
-        private readonly RecetaRepositorio _recetaRepositorio;
+        private readonly IRecetaService _recetaService;
         private readonly ILogger<RecetaController> _logger;
 
-        public RecetaController(RecetaRepositorio recetaRepositorio, ILogger<RecetaController> logger)
+        public RecetaController(IRecetaService recetaService, ILogger<RecetaController> logger)
         {
-            _recetaRepositorio = recetaRepositorio;
+            _recetaService = recetaService;
             _logger = logger;
         }
 
@@ -23,7 +23,7 @@ namespace CookingAPI.Controllers
         [HttpGet]
         public ActionResult<List<Receta>> GetAll()
         {
-            var recetas = _recetaRepositorio.GetAll();
+            var recetas = _recetaService.GetAll();
             if (recetas == null || !recetas.Any())
             {
                 return NotFound("No hay recetas disponibles.");
@@ -35,7 +35,7 @@ namespace CookingAPI.Controllers
         [HttpGet("{id}")]
         public ActionResult<Receta> Get(int id)
         {
-            var receta = _recetaRepositorio.Get(id);
+            var receta = _recetaService.Get(id);
             if (receta == null)
             {
                 return NotFound();
@@ -47,7 +47,7 @@ namespace CookingAPI.Controllers
         [HttpGet("todo")]
         public ActionResult<List<Receta>> GetCompleto()
         {
-            var recetas = _recetaRepositorio.GetAllRecetasCompletas();
+            var recetas = _recetaService.GetAllCompleto();
             if (recetas == null || !recetas.Any())
             {
                 return NotFound("No hay recetas disponibles.");
@@ -59,7 +59,7 @@ namespace CookingAPI.Controllers
         [HttpGet("todo/{id}")]
         public ActionResult<Receta> GetCompleto(int id)
         {
-            var receta = _recetaRepositorio.GetRecetaCompleta(id);
+            var receta = _recetaService.GetCompleto(id);
             if (receta == null)
             {
                 return NotFound();
@@ -76,7 +76,7 @@ namespace CookingAPI.Controllers
                 return BadRequest(ModelState); // Manejo de errores de validación
             }
 
-            _recetaRepositorio.Add(receta);
+            _recetaService.Add(receta);
             _logger.LogInformation($"Receta creada: {receta.Nombre} con ID {receta.IdReceta}.");
             return CreatedAtAction(nameof(Get), new { id = receta.IdReceta }, receta);
         }
@@ -90,13 +90,13 @@ namespace CookingAPI.Controllers
                 return BadRequest(ModelState); // Manejo de errores de validación
             }
 
-            var existingReceta = _recetaRepositorio.Get(id);
+            var existingReceta = _recetaService.Get(id);
             if (existingReceta == null)
             {
                 return NotFound();
             }
 
-            _recetaRepositorio.Update(receta);
+            _recetaService.Update(id, receta);
             _logger.LogInformation($"Receta actualizada: {receta.Nombre} con ID {receta.IdReceta}.");
             return NoContent();
         }
@@ -105,13 +105,13 @@ namespace CookingAPI.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var existingReceta = _recetaRepositorio.Get(id);
+            var existingReceta = _recetaService.Get(id);
             if (existingReceta == null)
             {
                 return NotFound();
             }
 
-            _recetaRepositorio.Delete(id);
+            _recetaService.Delete(id);
             _logger.LogInformation($"Receta eliminada con ID {id}.");
             return NoContent();
         }
@@ -120,7 +120,7 @@ namespace CookingAPI.Controllers
         [HttpGet("search")]
         public ActionResult<List<Receta>> Search(string? nombre = null, int? tipoDietaId = null, int? tipoAlergenoId = null)
         {
-            var recetas = _recetaRepositorio.SearchRecetas(nombre, tipoDietaId, tipoAlergenoId);
+            var recetas = _recetaService.SearchReceta(nombre, tipoDietaId, tipoAlergenoId);
             if (recetas == null || !recetas.Any())
             {
                 return NotFound("No se encontraron recetas con los criterios especificados.");
