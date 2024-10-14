@@ -6,33 +6,33 @@
 
     namespace CookingAPI.Services
     {
-        public class UsuarioService : IUsuarioService
+        public class UsuarioRecetaService
         {
-            private readonly IUsuarioRepositorio _usuarioRepositorio;
-            private readonly ILogger<UsuarioService> _logger;
+            private readonly IUsuarioRecetaRepositorio _usuarioRecetaRepositorio;
+            private readonly ILogger<UsuarioRecetaService> _logger;
 
-            public UsuarioService(IUsuarioRepositorio usuarioRepositorio, CookingModel context, ILogger<UsuarioService> logger)
+            public UsuarioRecetaService(IUsuarioRecetaRepositorio usuarioRecetaRepositorio, CookingModel context, ILogger<UsuarioRecetaService> logger)
             {
                 _logger = logger;
-                _usuarioRepositorio = usuarioRepositorio;
+                _usuarioRecetaRepositorio = usuarioRecetaRepositorio;
             }
 
             public bool ValidateCredentials(string username, string password)
             {
                 // Valida las credenciales usando el repositorio
-                return _usuarioRepositorio.ValidateCredentials(username, password);
+                return _usuarioRecetaRepositorio.ValidateCredentials(username, password);
             }
 
             public Usuario GetByUsername(string username)
             {
                 // Obtiene el usuario por nombre de usuario
-                return _usuarioRepositorio.GetByUsername(username);
+                return _usuarioRecetaRepositorio.GetByUsername(username);
             }
 
             public void Create(Usuario nuevoUsuario)
             {
                 // Crea un nuevo usuario
-                _usuarioRepositorio.Create(nuevoUsuario);
+                _usuarioRecetaRepositorio.Create(nuevoUsuario);
             }
         }
     }
