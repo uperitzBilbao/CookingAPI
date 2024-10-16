@@ -1,40 +1,43 @@
-﻿namespace CookingAPI.Services
+﻿using CookingAPI.InterfacesRepo;
+using CookingAPI.InterfacesService;
+using CookingAPI.Models;
+
+namespace CookingAPI.Services
 {
-    using global::CookingAPI.DataModel;
-    using global::CookingAPI.InterfacesRepo;
-    using global::CookingAPI.Models;
-
-    namespace CookingAPI.Services
+    public class UsuarioRecetaService : IUsuarioRecetaService
     {
-        public class UsuarioRecetaService
+        private readonly IUsuarioRecetaRepositorio _usuarioRecetaRepositorio;
+        private readonly ILogger<UsuarioRecetaService> _logger;
+
+        public UsuarioRecetaService(IUsuarioRecetaRepositorio usuarioRecetaRepositorio, ILogger<UsuarioRecetaService> logger)
         {
-            private readonly IUsuarioRecetaRepositorio _usuarioRecetaRepositorio;
-            private readonly ILogger<UsuarioRecetaService> _logger;
+            _usuarioRecetaRepositorio = usuarioRecetaRepositorio;
+            _logger = logger;
+        }
 
-            public UsuarioRecetaService(IUsuarioRecetaRepositorio usuarioRecetaRepositorio, CookingModel context, ILogger<UsuarioRecetaService> logger)
-            {
-                _logger = logger;
-                _usuarioRecetaRepositorio = usuarioRecetaRepositorio;
-            }
+        public void CrearReceta(int usuarioId, Receta receta)
+        {
+            _usuarioRecetaRepositorio.CrearReceta(usuarioId, receta);
+        }
 
-            public bool ValidateCredentials(string username, string password)
-            {
-                // Valida las credenciales usando el repositorio
-                return _usuarioRecetaRepositorio.ValidateCredentials(username, password);
-            }
+        public IEnumerable<Receta> ObtenerRecetasDelUsuario(int usuarioId)
+        {
+            return _usuarioRecetaRepositorio.ObtenerRecetasDelUsuario(usuarioId);
+        }
 
-            public Usuario GetByUsername(string username)
-            {
-                // Obtiene el usuario por nombre de usuario
-                return _usuarioRecetaRepositorio.GetByUsername(username);
-            }
+        public bool ActualizarReceta(int usuarioId, int recetaId, Receta recetaActualizada)
+        {
+            return _usuarioRecetaRepositorio.ActualizarReceta(usuarioId, recetaId, recetaActualizada);
+        }
 
-            public void Create(Usuario nuevoUsuario)
-            {
-                // Crea un nuevo usuario
-                _usuarioRecetaRepositorio.Create(nuevoUsuario);
-            }
+        public bool EliminarReceta(int usuarioId, int recetaId)
+        {
+            return _usuarioRecetaRepositorio.EliminarReceta(usuarioId, recetaId);
+        }
+
+        public Receta? ObtenerReceta(int usuarioId, int recetaId)
+        {
+            return _usuarioRecetaRepositorio.ObtenerReceta(usuarioId, recetaId);
         }
     }
-
 }

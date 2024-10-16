@@ -1,136 +1,103 @@
-﻿using CookingAPI.DataModel;
+﻿using CookingAPI.InterfacesService;
 using CookingAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace CookingAPI.Controllers
 {
-    [Authorize]
+
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "CustomPolicy")]
     public class UsuarioRecetaController : ControllerBase
     {
-        private readonly CookingModel _context;
+        private readonly IUsuarioRecetaService _usuarioRecetaService;
+        private readonly ILogger<UsuarioRecetaController> _logger;
 
-        public UsuarioRecetaController(CookingModel context)
+        public UsuarioRecetaController(IUsuarioRecetaService usuarioRecetaService, ILogger<UsuarioRecetaController> logger)
         {
-            _context = context;
+            _usuarioRecetaService = usuarioRecetaService;
+            _logger = logger;
         }
 
         [HttpPost]
-        public IActionResult CrearReceta(Receta receta)
+        public IActionResult CrearReceta([FromBody] Receta receta)
         {
             var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            receta.IdReceta = 0; // Asegúrate de que no tenga un ID antes de agregarla
-
-            _context.Recetas.Add(receta);
-            _context.SaveChanges();
-
-            // Agrega la relación en UsuarioReceta
-            var usuarioReceta = new UsuarioReceta
+            if (usuarioId == null)
             {
-                UsuarioId = int.Parse(usuarioId),
-                RecetaId = receta.IdReceta
-            };
+                return Unauthorized();
+            }
 
-            _context.UsuarioRecetas.Add(usuarioReceta);
-            _context.SaveChanges();
+            receta.IdReceta = 0; // Reinicia el ID de la receta antes de agregarla
+            _usuarioRecetaService.CrearReceta(int.Parse(usuarioId), receta);
 
             return CreatedAtAction(nameof(ObtenerReceta), new { id = receta.IdReceta }, receta);
         }
 
-        // Método para obtener recetas del usuario
         [HttpGet]
         public ActionResult<List<Receta>> ObtenerRecetasDelUsuario()
         {
             var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (usuarioId == null)
+            {
+                return Unauthorized();
+            }
 
-            var recetas = _context.UsuarioRecetas
-                .Where(ur => ur.UsuarioId == int.Parse(usuarioId))
-                .Include(ur => ur.Receta)
-                .Select(ur => ur.Receta)
-                .ToList();
-
+            var recetas = _usuarioRecetaService.ObtenerRecetasDelUsuario(int.Parse(usuarioId));
             return Ok(recetas);
         }
 
-        // Método para actualizar una receta del usuario
         [HttpPut("{id}")]
-        public IActionResult ActualizarReceta(int id, Receta recetaActualizada)
+        public IActionResult ActualizarReceta(int id, [FromBody] Receta recetaActualizada)
         {
             var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            // Verificar si la receta pertenece al usuario
-            var usuarioReceta = _context.UsuarioRecetas
-                .FirstOrDefault(ur => ur.RecetaId == id && ur.UsuarioId == int.Parse(usuarioId));
-
-            if (usuarioReceta == null)
+            if (usuarioId == null)
             {
-                return Forbid(); // El usuario no tiene permiso para actualizar esta receta
+                return Unauthorized();
             }
 
-            var receta = _context.Recetas.Find(id);
-            if (receta == null)
+            var actualizado = _usuarioRecetaService.ActualizarReceta(int.Parse(usuarioId), id, recetaActualizada);
+            if (!actualizado)
             {
-                return NotFound(); // La receta no existe
+                return Forbid(); // El usuario no tiene permiso para actualizar la receta
             }
 
-            // Actualiza los campos necesarios
-            receta.Nombre = recetaActualizada.Nombre;
-            receta.Elaboracion = recetaActualizada.Elaboracion;
-            // ... otros campos que quieras actualizar
-
-            _context.SaveChanges();
-            return NoContent(); // Respuesta sin contenido al actualizar correctamente
+            return NoContent(); // Actualización exitosa
         }
 
-        // Método para eliminar una receta del usuario
         [HttpDelete("{id}")]
         public IActionResult EliminarReceta(int id)
         {
             var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            // Verificar si la receta pertenece al usuario
-            var usuarioReceta = _context.UsuarioRecetas
-                .FirstOrDefault(ur => ur.RecetaId == id && ur.UsuarioId == int.Parse(usuarioId));
-
-            if (usuarioReceta == null)
+            if (usuarioId == null)
             {
-                return Forbid(); // El usuario no tiene permiso para eliminar esta receta
+                return Unauthorized();
             }
 
-            // Eliminar la receta
-            var receta = _context.Recetas.Find(id);
-            if (receta == null)
+            var eliminado = _usuarioRecetaService.EliminarReceta(int.Parse(usuarioId), id);
+            if (!eliminado)
             {
-                return NotFound(); // La receta no existe
+                return Forbid(); // El usuario no tiene permiso para eliminar la receta
             }
 
-            _context.Recetas.Remove(receta);
-            _context.UsuarioRecetas.Remove(usuarioReceta); // También eliminar la relación
-            _context.SaveChanges();
-
-            return NoContent(); // Respuesta sin contenido al eliminar correctamente
+            return NoContent(); // Eliminación exitosa
         }
 
-        // Método para obtener una receta específica del usuario
         [HttpGet("{id}")]
         public ActionResult<Receta> ObtenerReceta(int id)
         {
             var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (usuarioId == null)
+            {
+                return Unauthorized();
+            }
 
-            var receta = _context.UsuarioRecetas
-                .Where(ur => ur.UsuarioId == int.Parse(usuarioId) && ur.RecetaId == id)
-                .Include(ur => ur.Receta)
-                .Select(ur => ur.Receta)
-                .FirstOrDefault();
-
+            var receta = _usuarioRecetaService.ObtenerReceta(int.Parse(usuarioId), id);
             if (receta == null)
             {
-                return NotFound(); // La receta no existe o no pertenece al usuario
+                return NotFound();
             }
 
             return Ok(receta);

@@ -5,9 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CookingAPI.Controllers
 {
-    [Authorize]
+
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "CustomPolicy")]
     public class IngredienteController : ControllerBase
     {
         private readonly IngredienteService _ingredienteService;

@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CookingAPI.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "CustomPolicy")]
     public class RecetaController : ControllerBase
     {
         private readonly IRecetaService _recetaService;
@@ -26,7 +26,7 @@ namespace CookingAPI.Controllers
             var recetas = _recetaService.GetAll();
             if (recetas == null || !recetas.Any())
             {
-                return NotFound("No hay recetas disponibles.");
+                return NotFound(new ProblemDetails { Title = "No hay recetas disponibles." });
             }
             return Ok(recetas);
         }
@@ -38,9 +38,9 @@ namespace CookingAPI.Controllers
             var receta = _recetaService.Get(id);
             if (receta == null)
             {
-                return NotFound();
+                return NotFound(new ProblemDetails { Title = $"Receta con ID {id} no encontrada." });
             }
-            return Ok(receta); // Cambiado para seguir la convención de ActionResult
+            return Ok(receta);
         }
 
         // Obtener todas las recetas con toda la información relacionada
@@ -50,7 +50,7 @@ namespace CookingAPI.Controllers
             var recetas = _recetaService.GetAllCompleto();
             if (recetas == null || !recetas.Any())
             {
-                return NotFound("No hay recetas disponibles.");
+                return NotFound(new ProblemDetails { Title = "No hay recetas disponibles." });
             }
             return Ok(recetas);
         }
@@ -62,9 +62,9 @@ namespace CookingAPI.Controllers
             var receta = _recetaService.GetCompleto(id);
             if (receta == null)
             {
-                return NotFound();
+                return NotFound(new ProblemDetails { Title = $"Receta completa con ID {id} no encontrada." });
             }
-            return Ok(receta); // Cambiado para seguir la convención de ActionResult
+            return Ok(receta);
         }
 
         // Crear una nueva receta (incluye ingredientes)
@@ -73,7 +73,7 @@ namespace CookingAPI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState); // Manejo de errores de validación
+                return BadRequest(ModelState);
             }
 
             _recetaService.Add(receta);
@@ -87,13 +87,13 @@ namespace CookingAPI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState); // Manejo de errores de validación
+                return BadRequest(ModelState);
             }
 
             var existingReceta = _recetaService.Get(id);
             if (existingReceta == null)
             {
-                return NotFound();
+                return NotFound(new ProblemDetails { Title = $"Receta con ID {id} no encontrada." });
             }
 
             _recetaService.Update(id, receta);
@@ -108,7 +108,7 @@ namespace CookingAPI.Controllers
             var existingReceta = _recetaService.Get(id);
             if (existingReceta == null)
             {
-                return NotFound();
+                return NotFound(new ProblemDetails { Title = $"Receta con ID {id} no encontrada." });
             }
 
             _recetaService.Delete(id);
@@ -123,7 +123,7 @@ namespace CookingAPI.Controllers
             var recetas = _recetaService.SearchReceta(nombre, tipoDietaId, tipoAlergenoId);
             if (recetas == null || !recetas.Any())
             {
-                return NotFound("No se encontraron recetas con los criterios especificados.");
+                return NotFound(new ProblemDetails { Title = "No se encontraron recetas con los criterios especificados." });
             }
             return Ok(recetas);
         }

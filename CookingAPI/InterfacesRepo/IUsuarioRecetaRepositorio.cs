@@ -4,11 +4,10 @@ namespace CookingAPI.InterfacesRepo
 {
     public interface IUsuarioRecetaRepositorio
     {
-        void CrearReceta(Receta receta);
-        IEnumerable<Receta> ObtenerRecetasDelUsuario();
-        void ActualizarReceta(int id, Receta recetaActualizada);
-        void EliminarReceta(int id);
-        Receta? ObtenerReceta(int id); // Método para crear un nuevo usuario
-
+        void CrearReceta(int usuarioId, Receta receta);
+        IEnumerable<Receta> ObtenerRecetasDelUsuario(int usuarioId);
+        bool ActualizarReceta(int usuarioId, int recetaId, Receta recetaActualizada);
+        bool EliminarReceta(int usuarioId, int recetaId);
+        Receta? ObtenerReceta(int usuarioId, int recetaId);
     }
 }

@@ -1,40 +1,44 @@
-﻿namespace CookingAPI.Services
+﻿using CookingAPI.DataModel;
+using CookingAPI.InterfacesService;
+using CookingAPI.Models;
+
+namespace CookingAPI.Services
 {
-    using global::CookingAPI.DataModel;
-    using global::CookingAPI.InterfacesRepo;
-    using global::CookingAPI.Models;
-
-    namespace CookingAPI.Services
+    public class UsuarioService : IUsuarioService
     {
-        public class UsuarioService : IUsuarioService
+        private readonly CookingModel _context;
+
+        public UsuarioService(CookingModel context)
         {
-            private readonly IUsuarioRepositorio _usuarioRepositorio;
-            private readonly ILogger<UsuarioService> _logger;
+            _context = context;
+        }
 
-            public UsuarioService(IUsuarioRepositorio usuarioRepositorio, CookingModel context, ILogger<UsuarioService> logger)
-            {
-                _logger = logger;
-                _usuarioRepositorio = usuarioRepositorio;
-            }
+        public bool ValidateCredentials(string username, string password)
+        {
+            return _context.Usuarios.Any(u => u.Username == username && u.Password == password);
+        }
 
-            public bool ValidateCredentials(string username, string password)
-            {
-                // Valida las credenciales usando el repositorio
-                return _usuarioRepositorio.ValidateCredentials(username, password);
-            }
+        public Usuario GetByUsername(string username)
+        {
+            return _context.Usuarios.FirstOrDefault(u => u.Username == username);
+        }
 
-            public Usuario GetByUsername(string username)
-            {
-                // Obtiene el usuario por nombre de usuario
-                return _usuarioRepositorio.GetByUsername(username);
-            }
+        public int GetUserIdByUsername(string username)
+        {
+            var usuario = GetByUsername(username);
+            return usuario?.Id ?? 0; // Retorna 0 si no se encuentra el usuario
+        }
 
-            public void Create(Usuario nuevoUsuario)
-            {
-                // Crea un nuevo usuario
-                _usuarioRepositorio.Create(nuevoUsuario);
-            }
+        public void Create(Usuario nuevoUsuario)
+        {
+            _context.Usuarios.Add(nuevoUsuario);
+            _context.SaveChanges();
+        }
+
+        public void AsociarRecetaAUsuario(UsuarioReceta usuarioReceta)
+        {
+            _context.UsuarioRecetas.Add(usuarioReceta);
+            _context.SaveChanges();
         }
     }
-
 }
