@@ -21,7 +21,7 @@ namespace CookingAPI.ErrorHandler
             catch (Exception ex)
             {
                 Log.Error(ex, "Se produjo un error no manejado: {Message}", ex.Message);
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError; // 500
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError; // 500 Internal Server Error
                 await context.Response.WriteAsync("Se produjo un error interno en el servidor.");
             }
 
@@ -32,5 +32,4 @@ namespace CookingAPI.ErrorHandler
             }
         }
     }
-
 }

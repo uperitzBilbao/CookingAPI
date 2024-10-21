@@ -1,4 +1,5 @@
-﻿using CookingAPI.DataModel;
+﻿using CookingAPI.Constantes;
+using CookingAPI.DataModel;
 using CookingAPI.InterfacesRepo;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,42 +8,40 @@ namespace CookingAPI.Repositorio
     public class Repositorio<TEntity> : IRepositorio<TEntity> where TEntity : class
     {
         protected readonly CookingModel _context;
-        protected readonly DbSet<TEntity> _dbSet;
-        protected readonly ILogger<Repositorio<TEntity>> _logger;
+        protected readonly ILogger _logger;
 
-        // Constructor que acepta un logger
-        public Repositorio(CookingModel context, ILogger<Repositorio<TEntity>> logger)
+        public Repositorio(CookingModel context, ILogger logger)
         {
             _context = context;
-            _dbSet = context.Set<TEntity>();
             _logger = logger;
         }
 
-        // Métodos CRUD
-        public IEnumerable<TEntity> GetAll()
+        // Marcar este método como virtual para permitir sobrescritura en clases derivadas
+        public virtual TEntity Get(int id)
         {
             try
             {
-                _logger.LogInformation($"Obteniendo todas las entidades de tipo {typeof(TEntity).Name}.");
-                return _dbSet.AsNoTracking().ToList(); // Usamos AsNoTracking para optimizar rendimiento en lectura
+                _logger.LogInformation(Mensajes.Logs.OBTENIENDO_ENTIDAD, typeof(TEntity).Name, id);
+                return _context.Set<TEntity>().Find(id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al obtener todas las entidades de tipo {typeof(TEntity).Name}.");
+                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_ENTIDAD, typeof(TEntity).Name, id);
                 throw;
             }
         }
 
-        public TEntity Get(int id)
+        // Marcar este método como virtual para permitir sobrescritura en clases derivadas
+        public virtual IEnumerable<TEntity> GetAll()
         {
             try
             {
-                _logger.LogInformation($"Obteniendo entidad de tipo {typeof(TEntity).Name} con ID: {id}");
-                return _dbSet.Find(id); // No se usa AsNoTracking aquí ya que Find maneja el seguimiento
+                _logger.LogInformation(Mensajes.Logs.OBTENIENDO_TODAS, typeof(TEntity).Name);
+                return _context.Set<TEntity>().ToList();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al obtener la entidad de tipo {typeof(TEntity).Name} con ID: {id}");
+                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_TODAS, typeof(TEntity).Name);
                 throw;
             }
         }
@@ -51,13 +50,13 @@ namespace CookingAPI.Repositorio
         {
             try
             {
-                _logger.LogInformation($"Agregando una nueva entidad de tipo {typeof(TEntity).Name}");
-                _dbSet.Add(entity);
+                _logger.LogInformation(Mensajes.Logs.AGREGANDO_ENTIDAD, typeof(TEntity).Name);
+                _context.Set<TEntity>().Add(entity);
                 _context.SaveChanges();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al agregar una nueva entidad de tipo {typeof(TEntity).Name}");
+                _logger.LogError(ex, Mensajes.Logs.ERROR_AGREGAR_ENTIDAD, typeof(TEntity).Name);
                 throw;
             }
         }
@@ -66,21 +65,13 @@ namespace CookingAPI.Repositorio
         {
             try
             {
-                if (_dbSet.Find(id) == null)
-                {
-                    _logger.LogInformation($"No existe el id {typeof(TEntity).Name}");
-                }
-                else
-                {
-                    _logger.LogInformation($"Actualizando entidad de tipo {typeof(TEntity).Name}");
-                    _dbSet.Update(entity);
-                    _context.SaveChanges();
-                }
-
+                _logger.LogInformation(Mensajes.Logs.ACTUALIZANDO_ENTIDAD, typeof(TEntity).Name, id);
+                _context.Entry(entity).State = EntityState.Modified;
+                _context.SaveChanges();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al actualizar entidad de tipo {typeof(TEntity).Name}");
+                _logger.LogError(ex, Mensajes.Logs.ERROR_ACTUALIZAR_ENTIDAD, typeof(TEntity).Name, id);
                 throw;
             }
         }
@@ -89,21 +80,20 @@ namespace CookingAPI.Repositorio
         {
             try
             {
-                _logger.LogInformation($"Eliminando entidad de tipo {typeof(TEntity).Name} con ID: {id}");
-                var entity = _dbSet.Find(id);
-                if (entity != null)
+                var entity = _context.Set<TEntity>().Find(id);
+                if (entity == null)
                 {
-                    _dbSet.Remove(entity);
-                    _context.SaveChanges();
+                    _logger.LogWarning(Mensajes.Logs.ENTIDAD_NO_ENCONTRADA, typeof(TEntity).Name, id);
+                    return;
                 }
-                else
-                {
-                    _logger.LogWarning($"Entidad de tipo {typeof(TEntity).Name} con ID: {id} no encontrada para eliminar.");
-                }
+
+                _logger.LogInformation(Mensajes.Logs.ELIMINANDO_ENTIDAD, typeof(TEntity).Name, id);
+                _context.Set<TEntity>().Remove(entity);
+                _context.SaveChanges();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al eliminar la entidad de tipo {typeof(TEntity).Name} con ID: {id}");
+                _logger.LogError(ex, Mensajes.Logs.ERROR_ELIMINAR_ENTIDAD, typeof(TEntity).Name, id);
                 throw;
             }
         }

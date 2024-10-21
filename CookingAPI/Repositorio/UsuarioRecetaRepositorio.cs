@@ -1,129 +1,144 @@
-﻿using CookingAPI.DataModel;
+﻿using CookingAPI.Constantes;
+using CookingAPI.DataModel;
 using CookingAPI.InterfacesRepo;
+using CookingAPI.InterfacesService;
 using CookingAPI.Models;
-using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
 namespace CookingAPI.Repositorio
 {
     public class UsuarioRecetaRepositorio : Repositorio<UsuarioReceta>, IUsuarioRecetaRepositorio
     {
-
         private readonly ILogger<UsuarioRecetaRepositorio> _logger;
+        private readonly IUserIdService _userIdService;
 
-        public UsuarioRecetaRepositorio(CookingModel context, ILogger<UsuarioRecetaRepositorio> logger) : base(context, logger)
+        public UsuarioRecetaRepositorio(CookingModel context, ILogger<UsuarioRecetaRepositorio> logger, IUserIdService userIdService)
+            : base(context, logger)
         {
             _logger = logger;
+            _userIdService = userIdService;
         }
-
 
         public void CrearReceta(Receta receta)
         {
-            var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = _userIdService.GetUserId();
+            if (userId == 0)
+            {
+                _logger.LogError(Mensajes.Error.ERROR_USERID_NO_ENCONTRADO);
+                throw new Exception(Mensajes.Error.ERROR_NO_AUTENTICADO);
+            }
 
-            receta.IdReceta = 0; // Asegúrate de que no tenga un ID antes de agregarla
+            receta.IdReceta = 0; // Asegurarse de que es una receta nueva
 
             _context.Recetas.Add(receta);
             _context.SaveChanges();
 
-            // Agrega la relación en UsuarioReceta
             var usuarioReceta = new UsuarioReceta
             {
-                UsuarioId = int.Parse(usuarioId),
+                UsuarioId = userId,
                 RecetaId = receta.IdReceta
             };
 
             _context.UsuarioRecetas.Add(usuarioReceta);
             _context.SaveChanges();
-
         }
-
-        // Método para obtener recetas del usuario
 
         public List<Receta> ObtenerRecetasDelUsuario()
         {
-            var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = _userIdService.GetUserId();
+            if (userId == 0)
+            {
+                _logger.LogError(Mensajes.Error.ERROR_USERID_NO_ENCONTRADO);
+                throw new Exception(Mensajes.Error.ERROR_NO_AUTENTICADO);
+            }
 
-            var recetas = _context.UsuarioRecetas
-                .Where(ur => ur.UsuarioId == int.Parse(usuarioId))
+            return _context.UsuarioRecetas
+                .Where(ur => ur.UsuarioId == userId)
                 .Include(ur => ur.Receta)
                 .Select(ur => ur.Receta)
                 .ToList();
-
-            return recetas;
         }
 
-        // Método para actualizar una receta del usuario
-
-        public void ActualizarReceta(int id, Receta recetaActualizada)
+        public bool ActualizarReceta(int recetaId, Receta recetaActualizada)
         {
-            var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = _userIdService.GetUserId();
+            if (userId == 0)
+            {
+                _logger.LogError(Mensajes.Error.ERROR_USERID_NO_ENCONTRADO);
+                return false;
+            }
 
-            // Verificar si la receta pertenece al usuario
             var usuarioReceta = _context.UsuarioRecetas
-                .FirstOrDefault(ur => ur.RecetaId == id && ur.UsuarioId == int.Parse(usuarioId));
+                .FirstOrDefault(ur => ur.RecetaId == recetaId && ur.UsuarioId == userId);
 
             if (usuarioReceta == null)
             {
-                return Forbid(); // El usuario no tiene permiso para actualizar esta receta
+                _logger.LogError(Mensajes.Error.ERROR_NO_PERMISO_ACTUALIZAR);
+                return false;
             }
 
-            var receta = _context.Recetas.Find(id);
+            var receta = _context.Recetas.Find(recetaId);
             if (receta == null)
             {
-                // La receta no existe
+                _logger.LogError(Mensajes.Error.ERROR_NO_EXISTE_RECETA);
+                return false;
             }
 
-            // Actualiza los campos necesarios
             receta.Nombre = recetaActualizada.Nombre;
             receta.Elaboracion = recetaActualizada.Elaboracion;
-            // ... otros campos que quieras actualizar
+            receta.Raciones = recetaActualizada.Raciones;
+            receta.TiempoMinutos = recetaActualizada.TiempoMinutos;
+            receta.Presentacion = recetaActualizada.Presentacion;
 
             _context.SaveChanges();
-
+            return true;
         }
 
-        // Método para eliminar una receta del usuario
-
-        public void EliminarReceta(int id)
+        public bool EliminarReceta(int recetaId)
         {
-            var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = _userIdService.GetUserId();
+            if (userId == 0)
+            {
+                _logger.LogError(Mensajes.Error.ERROR_USERID_NO_ENCONTRADO);
+                return false;
+            }
 
-            // Verificar si la receta pertenece al usuario
             var usuarioReceta = _context.UsuarioRecetas
-                .FirstOrDefault(ur => ur.RecetaId == id && ur.UsuarioId == int.Parse(usuarioId));
+                .FirstOrDefault(ur => ur.RecetaId == recetaId && ur.UsuarioId == userId);
 
             if (usuarioReceta == null)
             {
-                return Forbid(); // El usuario no tiene permiso para eliminar esta receta
+                _logger.LogError(Mensajes.Error.ERROR_NO_PERMISO_ELIMINAR);
+                return false;
             }
 
-            // Eliminar la receta
-            var receta = _context.Recetas.Find(id);
+            var receta = _context.Recetas.Find(recetaId);
             if (receta == null)
             {
-                // La receta no existe
+                _logger.LogError(Mensajes.Error.ERROR_NO_EXISTE_RECETA);
+                return false;
             }
 
             _context.Recetas.Remove(receta);
-            _context.UsuarioRecetas.Remove(usuarioReceta); // También eliminar la relación
+            _context.UsuarioRecetas.Remove(usuarioReceta);
             _context.SaveChanges();
+            return true;
         }
 
-        // Método para obtener una receta específica del usuario
-
-        public Receta ObtenerReceta(int id)
+        public Receta? ObtenerReceta(int recetaId)
         {
-            var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = _userIdService.GetUserId();
+            if (userId == 0)
+            {
+                _logger.LogError(Mensajes.Error.ERROR_USERID_NO_ENCONTRADO);
+                return null;
+            }
 
-            var receta = _context.UsuarioRecetas
-                .Where(ur => ur.UsuarioId == int.Parse(usuarioId) && ur.RecetaId == id)
+            return _context.UsuarioRecetas
+                .Where(ur => ur.UsuarioId == userId && ur.RecetaId == recetaId)
                 .Include(ur => ur.Receta)
                 .Select(ur => ur.Receta)
                 .FirstOrDefault();
-
-
-            return receta;
         }
-
     }
 }

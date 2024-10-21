@@ -11,5 +11,4 @@ namespace CookingAPI.Authorization
             RequiredClaim = requiredClaim;
         }
     }
-
 }

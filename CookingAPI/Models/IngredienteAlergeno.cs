@@ -10,7 +10,7 @@ namespace CookingAPI.Models
         public int IdTipoAlergeno { get; set; }
 
 
-        public Ingrediente Ingrediente { get; set; } // Navegación hacia Ingrediente
-        public TipoAlergeno TipoAlergeno { get; set; } // Navegación hacia TipoAlergeno
+        public virtual Ingrediente Ingrediente { get; set; } // Navegación hacia Ingrediente
+        public virtual TipoAlergeno TipoAlergeno { get; set; } // Navegación hacia TipoAlergeno
     }
 }

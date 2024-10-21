@@ -11,7 +11,7 @@ namespace CookingAPI.Models
         public string Nombre { get; set; }
         [ForeignKey("TipoIngrediente")]
         public int IdTipoIngrediente { get; set; }
-        public TipoIngrediente TipoIngrediente { get; set; } // Propiedad de navegación
+        public virtual TipoIngrediente TipoIngrediente { get; set; } // Propiedad de navegación
         public List<IngredienteAlergeno> IngredienteAlergenos { get; set; } = new List<IngredienteAlergeno>();
     }
 

@@ -6,7 +6,7 @@ namespace CookingAPI.InterfacesRepo
     {
         Usuario? GetByUsername(string username);
         bool ValidateCredentials(string username, string password);
-        void Create(Usuario usuario); // Método para crear un nuevo usuario
-
+        void Create(Usuario usuario);
+        void AsociarRecetaAUsuario(UsuarioReceta usuarioReceta);
     }
 }

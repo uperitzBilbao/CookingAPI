@@ -65,6 +65,10 @@ namespace CookingAPI.DataModel
                 .WithMany(r => r.UsuarioRecetas)
                 .HasForeignKey(ur => ur.RecetaId);
 
+            modelBuilder.Entity<Usuario>()
+                .HasKey(u => u.Id);
+
+
             // Seed data para los enums
             modelBuilder.Entity<TipoDieta>().HasData(
                 new TipoDieta { IdTipoDieta = 1, Nombre = "Vegana" },

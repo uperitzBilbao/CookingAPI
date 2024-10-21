@@ -1,4 +1,4 @@
-﻿using CookingAPI.DataModel;
+﻿using CookingAPI.Constantes;
 using CookingAPI.InterfacesRepo;
 using CookingAPI.InterfacesService;
 using CookingAPI.Models;
@@ -7,115 +7,82 @@ namespace CookingAPI.Services
 {
     public class IngredienteService : IIngredienteService
     {
-        private readonly CookingModel _context;
-        private readonly ILogger<IngredienteService> _logger;
         private readonly IIngredienteRepositorio _ingredienteRepositorio;
+        private readonly ILogger<IngredienteService> _logger;
 
-        public IngredienteService(IIngredienteRepositorio ingredienteRepositorio, CookingModel context, ILogger<IngredienteService> logger)
+        public IngredienteService(IIngredienteRepositorio ingredienteRepositorio, ILogger<IngredienteService> logger)
         {
-            _context = context;
-            _logger = logger;
             _ingredienteRepositorio = ingredienteRepositorio;
+            _logger = logger;
         }
 
-        public List<Ingrediente> GetAll()
+        public IEnumerable<Ingrediente> GetAll()
         {
-            _logger.LogInformation("Obteniendo todos los ingredientes.");
-            return _context.Ingredientes.ToList();
+            try
+            {
+                _logger.LogInformation(Mensajes.Logs.OBTENER_INGREDIENTES);
+                return _ingredienteRepositorio.GetAll();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_INGREDIENTES);
+                throw;
+            }
         }
 
         public Ingrediente? Get(int id)
         {
-            _logger.LogInformation($"Buscando ingrediente con ID: {id}");
-            var ingrediente = _context.Ingredientes.FirstOrDefault(i => i.IdIngrediente == id);
-
-            if (ingrediente == null)
+            try
             {
-                _logger.LogWarning($"No se encontró ingrediente con ID: {id}");
+                _logger.LogInformation(Mensajes.Logs.OBTENER_INGREDIENTE_ID, id);
+                return _ingredienteRepositorio.Get(id);
             }
-            return ingrediente;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_INGREDIENTE_ID, id);
+                throw;
+            }
         }
 
         public void Add(Ingrediente ingrediente)
         {
-            _logger.LogInformation($"Agregando nuevo ingrediente: {ingrediente.Nombre}");
             try
             {
-                _context.Ingredientes.Add(ingrediente);
-                _context.SaveChanges();
-                _logger.LogInformation("Ingrediente agregado con éxito.");
+                _logger.LogInformation(Mensajes.Logs.AÑADIR_INGREDIENTE, ingrediente.Nombre);
+                _ingredienteRepositorio.Add(ingrediente);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al agregar el ingrediente.");
+                _logger.LogError(ex, Mensajes.Logs.ERROR_AÑADIR_INGREDIENTE, ingrediente.Nombre);
                 throw;
             }
         }
 
         public void Update(int id, Ingrediente updatedIngrediente)
         {
-            _logger.LogInformation($"Actualizando ingrediente con ID: {id}");
-            var ingrediente = Get(id);
-            if (ingrediente != null)
+            try
             {
-                try
-                {
-                    ingrediente.Nombre = updatedIngrediente.Nombre;
-                    ingrediente.IdTipoIngrediente = updatedIngrediente.IdTipoIngrediente;
-
-                    _context.Ingredientes.Update(ingrediente);
-                    _context.SaveChanges();
-                    _logger.LogInformation($"Ingrediente con ID: {id} actualizado con éxito.");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Error al actualizar el ingrediente con ID: {id}");
-                    throw;
-                }
+                _logger.LogInformation(Mensajes.Logs.ACTUALIZAR_INGREDIENTE, id);
+                _ingredienteRepositorio.Update(id, updatedIngrediente);
             }
-            else
+            catch (Exception ex)
             {
-                _logger.LogWarning($"No se encontró ingrediente con ID: {id} para actualizar.");
+                _logger.LogError(ex, Mensajes.Logs.ERROR_ACTUALIZAR_INGREDIENTE, id);
+                throw;
             }
         }
 
         public void Delete(int id)
         {
-            _logger.LogInformation($"Eliminando ingrediente con ID: {id}");
-            var ingrediente = Get(id);
-            if (ingrediente != null)
+            try
             {
-                try
-                {
-                    _context.Ingredientes.Remove(ingrediente);
-                    _context.SaveChanges();
-                    _logger.LogInformation($"Ingrediente con ID: {id} eliminado con éxito.");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Error al eliminar el ingrediente con ID: {id}");
-                    throw;
-                }
+                _logger.LogInformation(Mensajes.Logs.ELIMINAR_INGREDIENTE, id);
+                _ingredienteRepositorio.Delete(id);
             }
-            else
+            catch (Exception ex)
             {
-                _logger.LogWarning($"No se encontró ingrediente con ID: {id} para eliminar.");
-            }
-        }
-
-        // Obtener los alérgenos de un ingrediente
-        public List<TipoAlergeno> GetAlergenos(int id)
-        {
-            _logger.LogInformation($"Obteniendo alérgenos para el ingrediente con ID: {id}");
-            var ingrediente = Get(id);
-            if (ingrediente != null)
-            {
-                return ingrediente.IngredienteAlergenos.Select(ia => ia.TipoAlergeno).ToList();
-            }
-            else
-            {
-                _logger.LogWarning($"No se encontró ingrediente con ID: {id} para obtener alérgenos.");
-                return new List<TipoAlergeno>();
+                _logger.LogError(ex, Mensajes.Logs.ERROR_ELIMINAR_INGREDIENTE, id);
+                throw;
             }
         }
     }

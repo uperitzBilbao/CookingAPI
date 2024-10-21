@@ -1,8 +1,9 @@
-﻿using CookingAPI.InterfacesService;
+﻿using CookingAPI.Constantes;
+using CookingAPI.InterfacesService;
 using CookingAPI.Models;
+using CookingAPI.Repositorio;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
@@ -17,66 +18,110 @@ namespace CookingAPI.Controllers
     {
         private readonly IUsuarioService _usuarioService;
         private readonly IConfiguration _configuration;
-        private readonly IMemoryCache _cache;
+        private readonly IUserIdService _userIdService;
 
-        public UsuarioController(IUsuarioService usuarioService, IConfiguration configuration, IMemoryCache cache)
+        public UsuarioController(IUsuarioService usuarioService, IConfiguration configuration, IUserIdService userIdService)
         {
             _usuarioService = usuarioService;
             _configuration = configuration;
-            _cache = cache;
+            _userIdService = userIdService;
         }
 
+        // POST: api/usuario/login
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            if (_usuarioService.ValidateCredentials(request.Username, request.Password))
+            if (!ModelState.IsValid)
             {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var usuario = _usuarioService.GetByUsername(request.Username);
+                if (usuario == null || !PasswordHelper.VerifyPassword(request.Password, usuario.Password))
+                {
+                    return Unauthorized(new ProblemDetails { Title = Mensajes.Logs.USUARIO_CONTRASENA_INCORRECTA });
+                }
+
+                // Crear los claims
                 var claims = new[] { new Claim(ClaimTypes.Name, request.Username) };
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-                var tokenExpiryMinutes = int.Parse(_configuration["Jwt:ExpiryMinutes"]);
+                // Crear el token
                 var token = new JwtSecurityToken(
                     issuer: _configuration["Jwt:Issuer"],
                     audience: _configuration["Jwt:Audience"],
                     claims: claims,
-                    expires: DateTime.Now.AddMinutes(tokenExpiryMinutes),
-                    signingCredentials: creds);
+                    expires: DateTime.UtcNow.AddMinutes(30),
+                    signingCredentials: creds
+                );
 
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-                // Guarda el ID de usuario en caché
+                // Guardar el ID de usuario en caché
                 var userId = _usuarioService.GetUserIdByUsername(request.Username);
-                _cache.Set(request.Username, userId, TimeSpan.FromMinutes(tokenExpiryMinutes));
+                _userIdService.SetUserId(request.Username, userId);
 
                 return Ok(new { Token = tokenString });
             }
-            return Unauthorized();
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_SERVIDOR, Detail = ex.Message });
+            }
         }
 
+        // POST: api/usuario/register
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterRequest request)
         {
-            if (_usuarioService.GetByUsername(request.Username) != null)
+            if (!ModelState.IsValid)
             {
-                return Conflict("El nombre de usuario ya está en uso.");
+                return BadRequest(ModelState);
             }
 
-            var nuevoUsuario = new Usuario { Username = request.Username, Password = request.Password };
-            _usuarioService.Create(nuevoUsuario);
-            return CreatedAtAction(nameof(Login), new { username = nuevoUsuario.Username }, nuevoUsuario);
+            try
+            {
+                if (_usuarioService.GetByUsername(request.Username) != null)
+                {
+                    return Conflict(new ProblemDetails { Title = Mensajes.Logs.USUARIO_EN_USO });
+                }
+
+                var nuevoUsuario = new Usuario
+                {
+                    Username = request.Username,
+                    Password = PasswordHelper.HashPassword(request.Password)
+                };
+
+                _usuarioService.Create(nuevoUsuario);
+                return CreatedAtAction(nameof(Login), new { username = nuevoUsuario.Username }, nuevoUsuario);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Error.ERROR_CREAR_USUARIO, Detail = ex.Message });
+            }
         }
 
+        // POST: api/usuario/logout
         [HttpPost("logout")]
         [Authorize]
         public IActionResult Logout()
         {
-            var username = User.Identity.Name;
-            if (username != null)
+            try
             {
-                _cache.Remove(username); // Elimina el usuario de la caché
+                var username = User.Identity.Name;
+                if (username != null)
+                {
+                    _userIdService.RemoveUserId(username);
+                }
+
+                return NoContent();
             }
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_CERRAR_SESION, Detail = ex.Message });
+            }
         }
     }
 

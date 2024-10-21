@@ -1,16 +1,19 @@
-﻿using CookingAPI.DataModel;
+﻿using CookingAPI.Constantes;
+using CookingAPI.DataModel;
 using CookingAPI.InterfacesRepo;
 using CookingAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CookingAPI.Repositorio
 {
-    public class UsuarioRepositorio : Repositorio<Usuario>, IUsuarioRepositorio
+    public class UsuarioRepositorio : IUsuarioRepositorio
     {
-
+        private readonly CookingModel _context;
         private readonly ILogger<UsuarioRepositorio> _logger;
 
-        public UsuarioRepositorio(CookingModel context, ILogger<UsuarioRepositorio> logger) : base(context, logger)
+        public UsuarioRepositorio(CookingModel context, ILogger<UsuarioRepositorio> logger)
         {
+            _context = context;
             _logger = logger;
         }
 
@@ -18,13 +21,15 @@ namespace CookingAPI.Repositorio
         {
             try
             {
-                _logger.LogInformation($"Buscando usuario con nombre de usuario: {username}");
-                return _context.Usuarios.SingleOrDefault(u => u.Username == username);
+                _logger.LogInformation(Mensajes.Logs.BUSCANDO_USUARIO, username);
+                return _context.Usuarios
+                    .Include(u => u.UsuarioRecetas)
+                    .FirstOrDefault(u => u.Username == username);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al buscar el usuario por nombre de usuario");
-                return null;
+                _logger.LogError(ex, Mensajes.Error.ERROR_BUSCAR_USUARIO, username);
+                throw;
             }
         }
 
@@ -33,46 +38,49 @@ namespace CookingAPI.Repositorio
             try
             {
                 var usuario = GetByUsername(username);
-
                 if (usuario == null)
                 {
-                    _logger.LogWarning($"Usuario {username} no encontrado.");
+                    _logger.LogError(Mensajes.Error.USUARIO_NO_ENCONTRADO, username);
                     return false;
                 }
 
-                // Verificar la contraseña usando el hash almacenado
-                if (!PasswordHelper.VerifyPassword(password, usuario.Password))
-                {
-                    _logger.LogWarning($"Contraseña incorrecta para el usuario {username}.");
-                    return false;
-                }
-
-                _logger.LogInformation($"Usuario {username} autenticado correctamente.");
-                return true;
+                return PasswordHelper.VerifyPassword(password, usuario.Password);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al validar las credenciales para el usuario {username}");
-                return false;
+                _logger.LogError(ex, Mensajes.Error.ERROR_VALIDAR_CREDENCIALES, username);
+                throw;
             }
         }
-
 
         public void Create(Usuario usuario)
         {
             try
             {
-                usuario.Password = PasswordHelper.HashPassword(usuario.Password); // Hash de la contraseña
+                _logger.LogInformation(Mensajes.Logs.CREANDO_USUARIO, usuario.Username);
                 _context.Usuarios.Add(usuario);
                 _context.SaveChanges();
-                _logger.LogInformation($"Usuario {usuario.Username} creado correctamente.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al crear el usuario.");
+                _logger.LogError(ex, Mensajes.Error.ERROR_CREAR_USUARIO, usuario.Username);
                 throw;
             }
         }
 
+        public void AsociarRecetaAUsuario(UsuarioReceta usuarioReceta)
+        {
+            try
+            {
+                _logger.LogInformation(Mensajes.Logs.ASOCIAR_RECETA_USUARIO, usuarioReceta.RecetaId, usuarioReceta.UsuarioId);
+                _context.UsuarioRecetas.Add(usuarioReceta);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, Mensajes.Error.ERROR_ASOCIAR_RECETA_USUARIO, usuarioReceta.RecetaId, usuarioReceta.UsuarioId);
+                throw;
+            }
+        }
     }
 }

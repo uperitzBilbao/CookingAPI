@@ -1,106 +1,138 @@
-﻿using CookingAPI.InterfacesService;
+﻿using CookingAPI.Constantes;
+using CookingAPI.InterfacesService;
 using CookingAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace CookingAPI.Controllers
 {
-
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "CustomPolicy")]
+    [Authorize]
     public class UsuarioRecetaController : ControllerBase
     {
         private readonly IUsuarioRecetaService _usuarioRecetaService;
+        private readonly IUserIdService _userIdService;
         private readonly ILogger<UsuarioRecetaController> _logger;
 
-        public UsuarioRecetaController(IUsuarioRecetaService usuarioRecetaService, ILogger<UsuarioRecetaController> logger)
+        public UsuarioRecetaController(IUsuarioRecetaService usuarioRecetaService, IUserIdService userIdService, ILogger<UsuarioRecetaController> logger)
         {
             _usuarioRecetaService = usuarioRecetaService;
+            _userIdService = userIdService;
             _logger = logger;
         }
 
         [HttpPost]
         public IActionResult CrearReceta([FromBody] Receta receta)
         {
-            var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (usuarioId == null)
+            try
             {
-                return Unauthorized();
+                var userId = _userIdService.GetUserId();
+                if (userId == 0)
+                {
+                    return Unauthorized(new ProblemDetails { Title = Mensajes.Error.ERROR_NO_AUTENTICADO });
+                }
+
+                receta.UsuarioRecetas = new List<UsuarioReceta>
+                {
+                    new UsuarioReceta
+                    {
+                        UsuarioId = userId,
+                        RecetaId = receta.IdReceta
+                    }
+                };
+
+                _usuarioRecetaService.CrearReceta(receta);
+                _logger.LogInformation(Mensajes.Logs.CREAR_RECETA_USUARIO, userId, receta.Nombre);
+
+                return CreatedAtAction(nameof(ObtenerReceta), new { id = receta.IdReceta }, receta);
             }
-
-            receta.IdReceta = 0; // Reinicia el ID de la receta antes de agregarla
-            _usuarioRecetaService.CrearReceta(int.Parse(usuarioId), receta);
-
-            return CreatedAtAction(nameof(ObtenerReceta), new { id = receta.IdReceta }, receta);
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, Mensajes.Logs.ERROR_CREAR_RECETA_USUARIO);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_CREAR_RECETA });
+            }
         }
 
         [HttpGet]
         public ActionResult<List<Receta>> ObtenerRecetasDelUsuario()
         {
-            var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (usuarioId == null)
+            try
             {
-                return Unauthorized();
-            }
+                var userId = _userIdService.GetUserId();
+                if (userId == 0)
+                {
+                    return Unauthorized(new ProblemDetails { Title = Mensajes.Error.ERROR_NO_AUTENTICADO });
+                }
 
-            var recetas = _usuarioRecetaService.ObtenerRecetasDelUsuario(int.Parse(usuarioId));
-            return Ok(recetas);
+                var recetas = _usuarioRecetaService.ObtenerRecetasDelUsuario();
+                return Ok(recetas);
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_RECETAS_USUARIO);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_OBTENER_RECETAS_USUARIO });
+            }
         }
 
         [HttpPut("{id}")]
         public IActionResult ActualizarReceta(int id, [FromBody] Receta recetaActualizada)
         {
-            var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (usuarioId == null)
+            try
             {
-                return Unauthorized();
-            }
+                var actualizado = _usuarioRecetaService.ActualizarReceta(id, recetaActualizada);
+                if (!actualizado)
+                {
+                    return Unauthorized(new ProblemDetails { Title = Mensajes.Logs.ERROR_NO_PERMISO_ACTUALIZAR });
+                }
 
-            var actualizado = _usuarioRecetaService.ActualizarReceta(int.Parse(usuarioId), id, recetaActualizada);
-            if (!actualizado)
+                return NoContent();
+            }
+            catch (System.Exception ex)
             {
-                return Forbid(); // El usuario no tiene permiso para actualizar la receta
+                _logger.LogError(ex, Mensajes.Logs.ERROR_ACTUALIZAR_RECETA, id);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_ACTUALIZAR_RECETA });
             }
-
-            return NoContent(); // Actualización exitosa
         }
 
         [HttpDelete("{id}")]
         public IActionResult EliminarReceta(int id)
         {
-            var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (usuarioId == null)
+            try
             {
-                return Unauthorized();
-            }
+                var eliminado = _usuarioRecetaService.EliminarReceta(id);
+                if (!eliminado)
+                {
+                    return Unauthorized(new ProblemDetails { Title = Mensajes.Error.ERROR_NO_PERMISO_ELIMINAR });
+                }
 
-            var eliminado = _usuarioRecetaService.EliminarReceta(int.Parse(usuarioId), id);
-            if (!eliminado)
+                return NoContent();
+            }
+            catch (System.Exception ex)
             {
-                return Forbid(); // El usuario no tiene permiso para eliminar la receta
+                _logger.LogError(ex, Mensajes.Logs.ERROR_ELIMINAR_RECETA, id);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_ELIMINAR_RECETA });
             }
-
-            return NoContent(); // Eliminación exitosa
         }
 
         [HttpGet("{id}")]
         public ActionResult<Receta> ObtenerReceta(int id)
         {
-            var usuarioId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (usuarioId == null)
+            try
             {
-                return Unauthorized();
-            }
+                var receta = _usuarioRecetaService.ObtenerReceta(id);
+                if (receta == null)
+                {
+                    return NotFound(new ProblemDetails { Title = Mensajes.Logs.RECETA_NO_ENCONTRADA, Detail = $"Receta con ID {id} no encontrada" });
+                }
 
-            var receta = _usuarioRecetaService.ObtenerReceta(int.Parse(usuarioId), id);
-            if (receta == null)
+                return Ok(receta);
+            }
+            catch (System.Exception ex)
             {
-                return NotFound();
+                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_RECETA_ID, id);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_OBTENER_RECETA });
             }
-
-            return Ok(receta);
         }
     }
 }

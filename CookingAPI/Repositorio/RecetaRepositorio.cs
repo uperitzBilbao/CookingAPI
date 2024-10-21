@@ -1,4 +1,5 @@
-﻿using CookingAPI.DataModel;
+﻿using CookingAPI.Constantes;
+using CookingAPI.DataModel;
 using CookingAPI.InterfacesRepo;
 using CookingAPI.Models;
 using Microsoft.EntityFrameworkCore;
@@ -7,50 +8,43 @@ namespace CookingAPI.Repositorio
 {
     public class RecetaRepositorio : Repositorio<Receta>, IRecetaRepositorio
     {
-
         private readonly ILogger<RecetaRepositorio> _logger;
 
-
-        public RecetaRepositorio(CookingModel context, ILogger<RecetaRepositorio> logger)
-            : base(context, logger)
+        public RecetaRepositorio(CookingModel context, ILogger<RecetaRepositorio> logger) : base(context, logger)
         {
             _logger = logger;
-        }
-
-        public Receta GetRecetaCompleta(int id)
-        {
-            try
-            {
-                _logger.LogInformation($"Obteniendo receta completa con ID: {id}");
-                return _context.Recetas
-                    .Include(r => r.RecetaIngredientes)
-                        .ThenInclude(ri => ri.Ingrediente)
-                    .Include(r => r.TipoDieta)
-                    .Include(r => r.TipoElaboracion)
-                    .FirstOrDefault(r => r.IdReceta == id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error al obtener la receta completa con ID: {id}");
-                throw;
-            }
         }
 
         public List<Receta> GetAllRecetasCompletas()
         {
             try
             {
-                _logger.LogInformation("Obteniendo todas las recetas completas.");
+                _logger.LogInformation(Mensajes.Logs.OBTENER_RECETAS_COMPLETAS);
                 return _context.Recetas
                     .Include(r => r.RecetaIngredientes)
-                        .ThenInclude(ri => ri.Ingrediente)
-                    .Include(r => r.TipoDieta)
-                    .Include(r => r.TipoElaboracion)
+                    .ThenInclude(ri => ri.Ingrediente)
                     .ToList();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener todas las recetas completas.");
+                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_RECETAS_COMPLETAS);
+                throw;
+            }
+        }
+
+        public Receta GetRecetaCompleta(int id)
+        {
+            try
+            {
+                _logger.LogInformation(Mensajes.Logs.OBTENER_RECETA_ID, id);
+                return _context.Recetas
+                    .Include(r => r.RecetaIngredientes)
+                    .ThenInclude(ri => ri.Ingrediente)
+                    .FirstOrDefault(r => r.IdReceta == id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_RECETA_ID, id);
                 throw;
             }
         }
@@ -59,41 +53,32 @@ namespace CookingAPI.Repositorio
         {
             try
             {
-                _logger.LogInformation("Iniciando búsqueda de recetas.");
-                var query = _context.Recetas
-                    .Include(r => r.RecetaIngredientes)
-                        .ThenInclude(ri => ri.Ingrediente)
-                            .ThenInclude(i => i.IngredienteAlergenos)
-                                .ThenInclude(ia => ia.TipoAlergeno)
-                    .AsQueryable();
+                _logger.LogInformation(Mensajes.Logs.INICIANDO_BUSQUEDA_RECETAS);
+                var query = _context.Recetas.AsQueryable();
 
                 if (!string.IsNullOrEmpty(nombre))
                 {
-                    _logger.LogInformation($"Filtrando recetas por nombre: {nombre}");
+                    _logger.LogInformation(Mensajes.Logs.FILTRANDO_POR_NOMBRE, nombre);
                     query = query.Where(r => r.Nombre.Contains(nombre));
                 }
 
                 if (tipoDietaId.HasValue)
                 {
-                    _logger.LogInformation($"Filtrando recetas por tipo de dieta ID: {tipoDietaId.Value}");
-                    query = query.Where(r => r.IdTipoDieta == tipoDietaId.Value);
+                    _logger.LogInformation(Mensajes.Logs.FILTRANDO_POR_TIPO_DIETA, tipoDietaId);
+                    query = query.Where(r => r.IdTipoDieta == tipoDietaId);
                 }
 
                 if (tipoAlergenoId.HasValue)
                 {
-                    _logger.LogInformation($"Filtrando recetas por tipo de alérgeno ID: {tipoAlergenoId.Value}");
-                    query = query.Where(r => r.RecetaIngredientes
-                        .Any(ri => ri.Ingrediente.IngredienteAlergenos
-                            .Any(ia => ia.IdTipoAlergeno == tipoAlergenoId.Value)));
+                    _logger.LogInformation(Mensajes.Logs.FILTRANDO_POR_TIPO_ALERGENO, tipoAlergenoId);
+                    query = query.Where(r => r.RecetaIngredientes.Any(ri => ri.Ingrediente.IngredienteAlergenos.Any(ia => ia.IdTipoAlergeno == tipoAlergenoId)));
                 }
 
-                var result = query.ToList();
-                _logger.LogInformation($"Se encontraron {result.Count} recetas.");
-                return result;
+                return query.Include(r => r.RecetaIngredientes).ThenInclude(ri => ri.Ingrediente).ToList();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al buscar recetas.");
+                _logger.LogError(ex, Mensajes.Logs.ERROR_BUSQUEDA_RECETAS);
                 throw;
             }
         }

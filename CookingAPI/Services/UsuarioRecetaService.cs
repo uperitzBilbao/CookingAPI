@@ -1,4 +1,5 @@
-﻿using CookingAPI.InterfacesRepo;
+﻿using CookingAPI.Constantes;
+using CookingAPI.InterfacesRepo;
 using CookingAPI.InterfacesService;
 using CookingAPI.Models;
 
@@ -15,29 +16,74 @@ namespace CookingAPI.Services
             _logger = logger;
         }
 
-        public void CrearReceta(int usuarioId, Receta receta)
+        public void CrearReceta(Receta receta)
         {
-            _usuarioRecetaRepositorio.CrearReceta(usuarioId, receta);
+            try
+            {
+                _logger.LogInformation(Mensajes.Logs.CREAR_RECETA, receta.Nombre);
+                _usuarioRecetaRepositorio.CrearReceta(receta);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, Mensajes.Logs.ERROR_CREAR_RECETA, receta.Nombre);
+                throw;
+            }
         }
 
-        public IEnumerable<Receta> ObtenerRecetasDelUsuario(int usuarioId)
+        public IEnumerable<Receta> ObtenerRecetasDelUsuario()
         {
-            return _usuarioRecetaRepositorio.ObtenerRecetasDelUsuario(usuarioId);
+            try
+            {
+                _logger.LogInformation(Mensajes.Logs.OBTENER_RECETAS_USUARIO);
+                return _usuarioRecetaRepositorio.ObtenerRecetasDelUsuario();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_RECETAS_USUARIO);
+                throw;
+            }
         }
 
-        public bool ActualizarReceta(int usuarioId, int recetaId, Receta recetaActualizada)
+        public bool ActualizarReceta(int recetaId, Receta recetaActualizada)
         {
-            return _usuarioRecetaRepositorio.ActualizarReceta(usuarioId, recetaId, recetaActualizada);
+            try
+            {
+                _logger.LogInformation(Mensajes.Logs.ACTUALIZAR_RECETA, recetaId);
+                return _usuarioRecetaRepositorio.ActualizarReceta(recetaId, recetaActualizada);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, Mensajes.Logs.ERROR_ACTUALIZAR_RECETA, recetaId);
+                throw;
+            }
         }
 
-        public bool EliminarReceta(int usuarioId, int recetaId)
+        public bool EliminarReceta(int recetaId)
         {
-            return _usuarioRecetaRepositorio.EliminarReceta(usuarioId, recetaId);
+            try
+            {
+                _logger.LogInformation(Mensajes.Logs.ELIMINAR_RECETA, recetaId);
+                return _usuarioRecetaRepositorio.EliminarReceta(recetaId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, Mensajes.Logs.ERROR_ELIMINAR_RECETA, recetaId);
+                throw;
+            }
         }
 
-        public Receta? ObtenerReceta(int usuarioId, int recetaId)
+        public Receta? ObtenerReceta(int recetaId)
         {
-            return _usuarioRecetaRepositorio.ObtenerReceta(usuarioId, recetaId);
+            try
+            {
+                _logger.LogInformation(Mensajes.Logs.OBTENER_RECETA_ID, recetaId);
+                return _usuarioRecetaRepositorio.ObtenerReceta(recetaId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_RECETA_ID, recetaId);
+                throw;
+            }
         }
     }
 }

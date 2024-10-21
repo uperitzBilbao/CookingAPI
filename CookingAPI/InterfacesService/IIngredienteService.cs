@@ -4,7 +4,7 @@ namespace CookingAPI.InterfacesService
 {
     public interface IIngredienteService
     {
-        List<Ingrediente> GetAll();
+        IEnumerable<Ingrediente> GetAll();
         Ingrediente? Get(int id);
         void Add(Ingrediente ingrediente);
         void Update(int id, Ingrediente updatedIngrediente);

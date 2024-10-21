@@ -8,6 +8,6 @@ namespace CookingAPI.InterfacesService
         Usuario GetByUsername(string username);
         int GetUserIdByUsername(string username);
         void Create(Usuario nuevoUsuario);
-        void AsociarRecetaAUsuario(UsuarioReceta usuarioReceta); // Método para asociar recetas
+        void AsociarRecetaAUsuario(UsuarioReceta usuarioReceta);
     }
 }

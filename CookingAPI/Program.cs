@@ -6,7 +6,7 @@ using CookingAPI.InterfacesService;
 using CookingAPI.Repositorio;
 using CookingAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization; // Importa este espacio de nombres
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -22,30 +22,24 @@ namespace CookingAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
+
             // Configuración de Serilog
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .WriteTo.Console()
-                .WriteTo.File("logs/log-.txt",
-                              rollingInterval: RollingInterval.Day,
-                              shared: true,
-                              outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}")
+                .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
                 .CreateLogger();
 
             builder.Host.UseSerilog();
 
-            // Configurar el logging en toda la aplicación
-            builder.Logging.ClearProviders();
-            builder.Logging.AddConsole();
-
-            // Configurar la cadena de conexión para el contexto de la base de datos
+            // Configuración de servicios
             builder.Services.AddDbContext<CookingModel>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("CookingDatabase")));
 
-            // Agregar servicios al contenedor.
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddMemoryCache();
 
             // Registro de repositorios
             builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
@@ -53,11 +47,14 @@ namespace CookingAPI
             builder.Services.AddScoped<IRecetaRepositorio, RecetaRepositorio>();
             builder.Services.AddScoped<IIngredienteRepositorio, IngredienteRepositorio>();
 
-            // Registro de servicios 
+            // Registro de servicios
             builder.Services.AddScoped<IRecetaService, RecetaService>();
             builder.Services.AddScoped<IIngredienteService, IngredienteService>();
+            builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+            builder.Services.AddScoped<IUsuarioRecetaService, UsuarioRecetaService>();
+            builder.Services.AddScoped<IUserIdService, UserIdService>();
 
-            // Configurar el serializador para usar nombres de enums y preservar referencias
+            // Configuración del serializador
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>
                 {
@@ -65,28 +62,24 @@ namespace CookingAPI
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
 
-            // Configurar autenticación JWT
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
-                options.TokenValidationParameters = new TokenValidationParameters
+            // Configuración de autenticación JWT
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                    ValidAudience = builder.Configuration["Jwt:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(key)
-                };
-            });
+                    var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(key)
+                    };
+                });
 
-            // Registrar el handler y la política de autorización personalizada
+            // Configuración de la autorización personalizada
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("CustomPolicy", policy =>
@@ -95,14 +88,11 @@ namespace CookingAPI
             builder.Services.AddSingleton<IAuthorizationHandler, CustomAuthorizationHandler>();
 
             var app = builder.Build();
-
-            // Añadir el middleware de manejo de errores
+            var logger = app.Services.GetRequiredService<ILogger<Program>>();
+            // Middleware de manejo de errores
             app.UseMiddleware<ErrorHandlingMiddleware>();
 
-            // Obtener el logger global y pasar a las migraciones
-            var logger = app.Services.GetRequiredService<ILogger<Program>>();
-
-            // Aplicar migraciones de base de datos con el logger global
+            // Aplicación de migraciones
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
@@ -110,18 +100,16 @@ namespace CookingAPI
                 try
                 {
                     var context = services.GetRequiredService<CookingModel>();
-                    logger.LogInformation("Iniciando migraciones de la base de datos...");
-
                     context.Database.Migrate();
-                    logger.LogInformation("Migraciones de la base de datos aplicadas con éxito.");
+                    logger.LogInformation("Migraciones aplicadas con éxito.");
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Error al aplicar las migraciones de la base de datos.");
+                    logger.LogError(ex, "Error al aplicar las migraciones.");
                 }
             }
 
-            // Configurar la tubería de solicitudes HTTP.
+            // Configuración del pipeline HTTP
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -133,7 +121,7 @@ namespace CookingAPI
             app.UseAuthorization();
             app.UseResponseCaching();
             app.MapControllers();
-            logger.LogInformation("API en funcionamiento...");
+            logger.LogInformation("API Ejecutada y Lista.");
             app.Run();
         }
     }

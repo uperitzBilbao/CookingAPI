@@ -1,20 +1,20 @@
-﻿using CookingAPI.Models;
-using CookingAPI.Services;
+﻿using CookingAPI.Constantes;
+using CookingAPI.InterfacesService;
+using CookingAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CookingAPI.Controllers
 {
-
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "CustomPolicy")]
+    [Authorize]
     public class IngredienteController : ControllerBase
     {
-        private readonly IngredienteService _ingredienteService;
+        private readonly IIngredienteService _ingredienteService;
         private readonly ILogger<IngredienteController> _logger;
 
-        public IngredienteController(IngredienteService ingredienteService, ILogger<IngredienteController> logger)
+        public IngredienteController(IIngredienteService ingredienteService, ILogger<IngredienteController> logger)
         {
             _ingredienteService = ingredienteService;
             _logger = logger;
@@ -24,20 +24,36 @@ namespace CookingAPI.Controllers
         [HttpGet]
         public ActionResult<List<Ingrediente>> GetAll()
         {
-            var ingredientes = _ingredienteService.GetAll();
-            return Ok(ingredientes);
+            try
+            {
+                var ingredientes = _ingredienteService.GetAll();
+                return Ok(ingredientes);
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_INGREDIENTES);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_OBTENER_INGREDIENTES });
+            }
         }
 
         // GET: api/ingrediente/{id}
         [HttpGet("{id}")]
         public ActionResult<Ingrediente> Get(int id)
         {
-            var ingrediente = _ingredienteService.Get(id);
-            if (ingrediente == null)
+            try
             {
-                return NotFound();
+                var ingrediente = _ingredienteService.Get(id);
+                if (ingrediente == null)
+                {
+                    return NotFound(new ProblemDetails { Title = Mensajes.Logs.INGREDIENTE_NO_ENCONTRADO });
+                }
+                return Ok(ingrediente);
             }
-            return Ok(ingrediente);
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_INGREDIENTE_ID, id);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_OBTENER_INGREDIENTE });
+            }
         }
 
         // POST: api/ingrediente
@@ -46,12 +62,20 @@ namespace CookingAPI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState); // Manejo de errores de validación
+                return BadRequest(ModelState);
             }
 
-            _ingredienteService.Add(ingrediente);
-            _logger.LogInformation($"Ingrediente creado: {ingrediente.Nombre} con ID {ingrediente.IdIngrediente}.");
-            return CreatedAtAction(nameof(Get), new { id = ingrediente.IdIngrediente }, ingrediente);
+            try
+            {
+                _ingredienteService.Add(ingrediente);
+                _logger.LogInformation(Mensajes.Logs.CREAR_INGREDIENTE, ingrediente.Nombre);
+                return CreatedAtAction(nameof(Get), new { id = ingrediente.IdIngrediente }, ingrediente);
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, Mensajes.Logs.ERROR_CREAR_INGREDIENTE);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_CREAR_INGREDIENTE });
+            }
         }
 
         // PUT: api/ingrediente/{id}
@@ -60,33 +84,49 @@ namespace CookingAPI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState); // Manejo de errores de validación
+                return BadRequest(ModelState);
             }
 
-            var existingIngrediente = _ingredienteService.Get(id);
-            if (existingIngrediente == null)
+            try
             {
-                return NotFound();
-            }
+                var existingIngrediente = _ingredienteService.Get(id);
+                if (existingIngrediente == null)
+                {
+                    return NotFound(new ProblemDetails { Title = Mensajes.Logs.INGREDIENTE_NO_ENCONTRADO });
+                }
 
-            _ingredienteService.Update(id, ingrediente);
-            _logger.LogInformation($"Ingrediente actualizado: {ingrediente.Nombre} con ID {ingrediente.IdIngrediente}.");
-            return NoContent();
+                _ingredienteService.Update(id, ingrediente);
+                _logger.LogInformation(Mensajes.Logs.ACTUALIZAR_INGREDIENTE, ingrediente.Nombre, id);
+                return NoContent();
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, Mensajes.Logs.ERROR_ACTUALIZAR_INGREDIENTE, id);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_ACTUALIZAR_INGREDIENTE });
+            }
         }
 
         // DELETE: api/ingrediente/{id}
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var ingrediente = _ingredienteService.Get(id);
-            if (ingrediente == null)
+            try
             {
-                return NotFound();
-            }
+                var ingrediente = _ingredienteService.Get(id);
+                if (ingrediente == null)
+                {
+                    return NotFound(new ProblemDetails { Title = Mensajes.Logs.INGREDIENTE_NO_ENCONTRADO });
+                }
 
-            _ingredienteService.Delete(id);
-            _logger.LogInformation($"Ingrediente eliminado con ID {id}.");
-            return NoContent();
+                _ingredienteService.Delete(id);
+                _logger.LogInformation(Mensajes.Logs.ELIMINAR_INGREDIENTE, id);
+                return NoContent();
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, Mensajes.Logs.ERROR_ELIMINAR_INGREDIENTE, id);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_ELIMINAR_INGREDIENTE });
+            }
         }
     }
 }
