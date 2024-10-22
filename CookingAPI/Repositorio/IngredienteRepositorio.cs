@@ -27,7 +27,7 @@ namespace CookingAPI.Repositorio
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_INGREDIENTES);
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_INGREDIENTES);
                 throw;
             }
         }
@@ -44,7 +44,7 @@ namespace CookingAPI.Repositorio
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_INGREDIENTE_ID, id);
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_INGREDIENTE_ID, id);
                 throw;
             }
         }

@@ -1,4 +1,5 @@
 using CookingAPI.Authorization;
+using CookingAPI.Constantes;
 using CookingAPI.DataModel;
 using CookingAPI.ErrorHandler;
 using CookingAPI.InterfacesRepo;
@@ -45,11 +46,13 @@ namespace CookingAPI
             builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
             builder.Services.AddScoped<IUsuarioRecetaRepositorio, UsuarioRecetaRepositorio>();
             builder.Services.AddScoped<IRecetaRepositorio, RecetaRepositorio>();
+            builder.Services.AddScoped<IRecetaIngredienteRepositorio, RecetaIngredienteRepositorio>();
             builder.Services.AddScoped<IIngredienteRepositorio, IngredienteRepositorio>();
 
             // Registro de servicios
             builder.Services.AddScoped<IRecetaService, RecetaService>();
             builder.Services.AddScoped<IIngredienteService, IngredienteService>();
+            builder.Services.AddScoped<IRecetaIngredienteService, RecetaIngredienteService>();
             builder.Services.AddScoped<IUsuarioService, UsuarioService>();
             builder.Services.AddScoped<IUsuarioRecetaService, UsuarioRecetaService>();
             builder.Services.AddScoped<IUserIdService, UserIdService>();
@@ -101,11 +104,11 @@ namespace CookingAPI
                 {
                     var context = services.GetRequiredService<CookingModel>();
                     context.Database.Migrate();
-                    logger.LogInformation("Migraciones aplicadas con éxito.");
+                    logger.LogInformation(Mensajes.Informacion.MIGRACIONES_CON_EXITO);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Error al aplicar las migraciones.");
+                    logger.LogError(ex, Mensajes.Error.ERROR_MIGRACIONES);
                 }
             }
 
@@ -121,7 +124,7 @@ namespace CookingAPI
             app.UseAuthorization();
             app.UseResponseCaching();
             app.MapControllers();
-            logger.LogInformation("API Ejecutada y Lista.");
+            logger.LogInformation(Mensajes.Informacion.API_LISTA);
             app.Run();
         }
     }

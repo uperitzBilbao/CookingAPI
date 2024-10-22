@@ -2,17 +2,22 @@
 using CookingAPI.InterfacesRepo;
 using CookingAPI.InterfacesService;
 using CookingAPI.Models;
+using CookingAPI.Requests;
 
 namespace CookingAPI.Services
 {
     public class IngredienteService : IIngredienteService
     {
         private readonly IIngredienteRepositorio _ingredienteRepositorio;
+        private readonly ITipoAlergenoRepositorio _tipoAlergenoRepositorio;
+        private readonly IIngredienteAlergenoRepositorio _ingredienteAlergenoRepositorio;
         private readonly ILogger<IngredienteService> _logger;
 
-        public IngredienteService(IIngredienteRepositorio ingredienteRepositorio, ILogger<IngredienteService> logger)
+        public IngredienteService(ITipoAlergenoRepositorio tipoAlergenoRepositorio, IIngredienteAlergenoRepositorio ingredienteAlergenoRepositorio, IIngredienteRepositorio ingredienteRepositorio, ILogger<IngredienteService> logger)
         {
             _ingredienteRepositorio = ingredienteRepositorio;
+            _ingredienteAlergenoRepositorio = ingredienteAlergenoRepositorio;
+            _tipoAlergenoRepositorio = tipoAlergenoRepositorio;
             _logger = logger;
         }
 
@@ -25,7 +30,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_INGREDIENTES);
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_INGREDIENTES);
                 throw;
             }
         }
@@ -39,35 +44,66 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_INGREDIENTE_ID, id);
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_INGREDIENTE_ID, id);
                 throw;
             }
         }
 
-        public void Add(Ingrediente ingrediente)
+        public void Add(IngredienteRequest request)
         {
             try
             {
-                _logger.LogInformation(Mensajes.Logs.AÑADIR_INGREDIENTE, ingrediente.Nombre);
-                _ingredienteRepositorio.Add(ingrediente);
+                var nuevo = new Ingrediente
+                {
+                    Nombre = request.Nombre,
+                    IdIngrediente = request.IdTipoIngrediente,
+                };
+
+                _logger.LogInformation(Mensajes.Logs.AÑADIR_INGREDIENTE, nuevo.Nombre);
+                _ingredienteRepositorio.Add(nuevo);
+
+                foreach (string alergeno in request.Alergenos)
+                {
+                    var idAlergeno = _tipoAlergenoRepositorio.GetByNombre(alergeno);
+                    var nuevoIngredienteAlergeno = new IngredienteAlergeno
+                    {
+                        IdTipoAlergeno = _tipoAlergenoRepositorio.GetByNombre(alergeno).IdTipoAlergeno,
+                        IdIngrediente = nuevo.IdIngrediente
+                    };
+                    _ingredienteAlergenoRepositorio.Add(nuevoIngredienteAlergeno);
+                }
+
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_AÑADIR_INGREDIENTE, ingrediente.Nombre);
+                _logger.LogError(ex, Mensajes.Error.ERROR_AÑADIR_INGREDIENTE, request.Nombre);
                 throw;
             }
         }
 
-        public void Update(int id, Ingrediente updatedIngrediente)
+        public void Update(int id, IngredienteRequest request)
         {
             try
             {
+
+                var nuevo = new Ingrediente
+                {
+                    Nombre = request.Nombre,
+                    IdIngrediente = request.IdTipoIngrediente,
+                };
+
+                _logger.LogInformation(Mensajes.Logs.AÑADIR_INGREDIENTE, nuevo.Nombre);
+                _ingredienteRepositorio.Add(nuevo);
+
+
+
+
                 _logger.LogInformation(Mensajes.Logs.ACTUALIZAR_INGREDIENTE, id);
-                _ingredienteRepositorio.Update(id, updatedIngrediente);
+                _ingredienteRepositorio.Update(id, nuevo);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_ACTUALIZAR_INGREDIENTE, id);
+                _logger.LogError(ex, Mensajes.Error.ERROR_ACTUALIZAR_INGREDIENTE, id);
                 throw;
             }
         }
@@ -81,7 +117,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_ELIMINAR_INGREDIENTE, id);
+                _logger.LogError(ex, Mensajes.Error.ERROR_ELIMINAR_INGREDIENTE, id);
                 throw;
             }
         }

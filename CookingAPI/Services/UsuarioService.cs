@@ -9,12 +9,14 @@ namespace CookingAPI.Services
     public class UsuarioService : IUsuarioService
     {
         private readonly IUsuarioRepositorio _usuarioRepositorio;
+        private readonly IUsuarioRecetaRepositorio _usuarioRecetaRepositorio;
         private readonly ILogger<UsuarioService> _logger;
 
-        public UsuarioService(IUsuarioRepositorio usuarioRepositorio, ILogger<UsuarioService> logger)
+        public UsuarioService(IUsuarioRepositorio usuarioRepositorio, IUsuarioRecetaRepositorio usuarioRecetaRepositorio, ILogger<UsuarioService> logger)
         {
             _usuarioRepositorio = usuarioRepositorio;
             _logger = logger;
+            _usuarioRecetaRepositorio = usuarioRecetaRepositorio;
         }
 
         public bool ValidateCredentials(string username, string password)
@@ -47,7 +49,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_USUARIO, username);
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_USUARIO, username);
                 throw;
             }
         }
@@ -67,7 +69,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_USERID, username);
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_USERID, username);
                 throw;
             }
         }
@@ -81,7 +83,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_CREAR_USUARIO, nuevoUsuario.Username);
+                _logger.LogError(ex, Mensajes.Error.ERROR_CREAR_USUARIO, nuevoUsuario.Username);
                 throw;
             }
         }
@@ -95,7 +97,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_ASOCIAR_RECETA, usuarioReceta.RecetaId, usuarioReceta.UsuarioId);
+                _logger.LogError(ex, Mensajes.Error.ERROR_ASOCIAR_RECETA, usuarioReceta.RecetaId, usuarioReceta.UsuarioId);
                 throw;
             }
         }

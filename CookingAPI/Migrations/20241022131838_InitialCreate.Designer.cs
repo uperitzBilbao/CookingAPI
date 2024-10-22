@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CookingAPI.Migrations
 {
     [DbContext(typeof(CookingModel))]
-    [Migration("20241021155020_InitialCreate")]
+    [Migration("20241022131838_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -215,7 +215,10 @@ namespace CookingAPI.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.HasKey("UsuarioId", "RecetaId");
 
@@ -236,7 +239,10 @@ namespace CookingAPI.Migrations
                         .HasColumnType("real");
 
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.HasKey("IdReceta", "IdIngrediente");
 

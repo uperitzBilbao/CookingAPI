@@ -136,6 +136,7 @@ namespace CookingAPI.Migrations
                     UsuarioId = table.Column<int>(type: "int", nullable: false),
                     RecetaId = table.Column<int>(type: "int", nullable: false),
                     Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1")
                 },
                 constraints: table =>
                 {
@@ -191,7 +192,8 @@ namespace CookingAPI.Migrations
                 {
                     IdReceta = table.Column<int>(type: "int", nullable: false),
                     IdIngrediente = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Cantidad = table.Column<float>(type: "real", nullable: false)
                 },
                 constraints: table =>
@@ -299,15 +301,15 @@ namespace CookingAPI.Migrations
 
             migrationBuilder.InsertData(
                 table: "RecetaIngredientes",
-                columns: new[] { "IdIngrediente", "IdReceta", "Cantidad", "Id" },
+                columns: new[] { "IdIngrediente", "IdReceta", "Cantidad" },
                 values: new object[,]
                 {
-                    { 1, 1, 250f, 0 },
-                    { 2, 1, 300f, 0 },
-                    { 3, 1, 1f, 0 },
-                    { 4, 2, 100f, 0 },
-                    { 5, 2, 150f, 0 },
-                    { 6, 2, 100f, 0 }
+                    { 1, 1, 250f },
+                    { 2, 1, 300f },
+                    { 3, 1, 1f },
+                    { 4, 2, 100f },
+                    { 5, 2, 150f },
+                    { 6, 2, 100f }
                 });
 
             migrationBuilder.CreateIndex(

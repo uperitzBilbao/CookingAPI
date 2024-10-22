@@ -29,7 +29,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_RECUPERAR_USERID);
+                _logger.LogError(ex, Mensajes.Error.ERROR_RECUPERAR_USERID);
                 throw;
             }
         }
@@ -43,7 +43,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_ESTABLECER_USERID, username);
+                _logger.LogError(ex, Mensajes.Error.ERROR_ESTABLECER_USERID, username);
                 throw;
             }
         }
@@ -57,7 +57,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_REMOVER_USERID, username);
+                _logger.LogError(ex, Mensajes.Error.ERROR_REMOVER_USERID, username);
                 throw;
             }
         }

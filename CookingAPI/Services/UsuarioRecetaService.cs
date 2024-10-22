@@ -25,7 +25,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_CREAR_RECETA, receta.Nombre);
+                _logger.LogError(ex, Mensajes.Error.ERROR_CREAR_RECETA, receta.Nombre);
                 throw;
             }
         }
@@ -39,7 +39,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_RECETAS_USUARIO);
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_RECETAS_USUARIO);
                 throw;
             }
         }
@@ -53,7 +53,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_ACTUALIZAR_RECETA, recetaId);
+                _logger.LogError(ex, Mensajes.Error.ERROR_ACTUALIZAR_RECETA, recetaId);
                 throw;
             }
         }
@@ -67,7 +67,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_ELIMINAR_RECETA, recetaId);
+                _logger.LogError(ex, Mensajes.Error.ERROR_ELIMINAR_RECETA, recetaId);
                 throw;
             }
         }
@@ -81,7 +81,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_RECETA_ID, recetaId);
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_RECETA_ID, recetaId);
                 throw;
             }
         }

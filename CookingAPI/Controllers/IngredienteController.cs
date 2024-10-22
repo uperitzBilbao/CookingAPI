@@ -1,6 +1,7 @@
 ﻿using CookingAPI.Constantes;
 using CookingAPI.InterfacesService;
 using CookingAPI.Models;
+using CookingAPI.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,8 +32,8 @@ namespace CookingAPI.Controllers
             }
             catch (System.Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_INGREDIENTES);
-                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_OBTENER_INGREDIENTES });
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_INGREDIENTES);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Error.ERROR_OBTENER_INGREDIENTES });
             }
         }
 
@@ -51,14 +52,14 @@ namespace CookingAPI.Controllers
             }
             catch (System.Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_INGREDIENTE_ID, id);
-                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_OBTENER_INGREDIENTE });
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_INGREDIENTE_ID, id);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Error.ERROR_OBTENER_INGREDIENTE });
             }
         }
 
         // POST: api/ingrediente
         [HttpPost]
-        public ActionResult<Ingrediente> CreateIngrediente([FromBody] Ingrediente ingrediente)
+        public ActionResult<Ingrediente> CreateIngrediente([FromBody] IngredienteRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -67,20 +68,20 @@ namespace CookingAPI.Controllers
 
             try
             {
-                _ingredienteService.Add(ingrediente);
-                _logger.LogInformation(Mensajes.Logs.CREAR_INGREDIENTE, ingrediente.Nombre);
-                return CreatedAtAction(nameof(Get), new { id = ingrediente.IdIngrediente }, ingrediente);
+                _ingredienteService.Add(request);
+                _logger.LogInformation(Mensajes.Logs.CREAR_INGREDIENTE, request.Nombre);
+                return CreatedAtAction(nameof(Get), request);
             }
             catch (System.Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_CREAR_INGREDIENTE);
-                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_CREAR_INGREDIENTE });
+                _logger.LogError(ex, Mensajes.Error.ERROR_CREAR_INGREDIENTE);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Error.ERROR_CREAR_INGREDIENTE });
             }
         }
 
         // PUT: api/ingrediente/{id}
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] Ingrediente ingrediente)
+        public IActionResult Update(int id, [FromBody] IngredienteRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -95,14 +96,14 @@ namespace CookingAPI.Controllers
                     return NotFound(new ProblemDetails { Title = Mensajes.Logs.INGREDIENTE_NO_ENCONTRADO });
                 }
 
-                _ingredienteService.Update(id, ingrediente);
-                _logger.LogInformation(Mensajes.Logs.ACTUALIZAR_INGREDIENTE, ingrediente.Nombre, id);
+                _ingredienteService.Update(id, request);
+                _logger.LogInformation(Mensajes.Logs.ACTUALIZAR_INGREDIENTE, request.Nombre, id);
                 return NoContent();
             }
             catch (System.Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_ACTUALIZAR_INGREDIENTE, id);
-                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_ACTUALIZAR_INGREDIENTE });
+                _logger.LogError(ex, Mensajes.Error.ERROR_ACTUALIZAR_INGREDIENTE, id);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Error.ERROR_ACTUALIZAR_INGREDIENTE });
             }
         }
 
@@ -124,8 +125,8 @@ namespace CookingAPI.Controllers
             }
             catch (System.Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_ELIMINAR_INGREDIENTE, id);
-                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_ELIMINAR_INGREDIENTE });
+                _logger.LogError(ex, Mensajes.Error.ERROR_ELIMINAR_INGREDIENTE, id);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Error.ERROR_ELIMINAR_INGREDIENTE });
             }
         }
     }

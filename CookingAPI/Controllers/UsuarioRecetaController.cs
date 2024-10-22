@@ -49,8 +49,8 @@ namespace CookingAPI.Controllers
             }
             catch (System.Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_CREAR_RECETA_USUARIO);
-                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_CREAR_RECETA });
+                _logger.LogError(ex, Mensajes.Error.ERROR_CREAR_RECETA_USUARIO);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Error.ERROR_CREAR_RECETA });
             }
         }
 
@@ -70,8 +70,8 @@ namespace CookingAPI.Controllers
             }
             catch (System.Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_RECETAS_USUARIO);
-                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_OBTENER_RECETAS_USUARIO });
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_RECETAS_USUARIO);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Error.ERROR_OBTENER_RECETAS_USUARIO });
             }
         }
 
@@ -83,15 +83,15 @@ namespace CookingAPI.Controllers
                 var actualizado = _usuarioRecetaService.ActualizarReceta(id, recetaActualizada);
                 if (!actualizado)
                 {
-                    return Unauthorized(new ProblemDetails { Title = Mensajes.Logs.ERROR_NO_PERMISO_ACTUALIZAR });
+                    return Unauthorized(new ProblemDetails { Title = Mensajes.Error.ERROR_NO_PERMISO_ACTUALIZAR });
                 }
 
                 return NoContent();
             }
             catch (System.Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_ACTUALIZAR_RECETA, id);
-                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_ACTUALIZAR_RECETA });
+                _logger.LogError(ex, Mensajes.Error.ERROR_ACTUALIZAR_RECETA, id);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Error.ERROR_ACTUALIZAR_RECETA });
             }
         }
 
@@ -110,8 +110,8 @@ namespace CookingAPI.Controllers
             }
             catch (System.Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_ELIMINAR_RECETA, id);
-                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_ELIMINAR_RECETA });
+                _logger.LogError(ex, Mensajes.Error.ERROR_ELIMINAR_RECETA, id);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Error.ERROR_ELIMINAR_RECETA });
             }
         }
 
@@ -130,8 +130,8 @@ namespace CookingAPI.Controllers
             }
             catch (System.Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_RECETA_ID, id);
-                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_OBTENER_RECETA });
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_RECETA_ID, id);
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Error.ERROR_OBTENER_RECETA });
             }
         }
     }

@@ -9,11 +9,17 @@ namespace CookingAPI.Services
     {
         private readonly IRecetaRepositorio _recetaRepositorio;
         private readonly ILogger<RecetaService> _logger;
+        private readonly IUsuarioRecetaRepositorio _usuarioRecetaRepositorio;
+        private readonly IRecetaIngredienteRepositorio _recetaIngredienteRepositorio;
+        private readonly IUserIdService _userIdService;
 
-        public RecetaService(IRecetaRepositorio recetaRepositorio, ILogger<RecetaService> logger)
+        public RecetaService(IRecetaRepositorio recetaRepositorio, IRecetaIngredienteRepositorio recetaIngredienteRepositorio, IUsuarioRecetaRepositorio usuarioRecetaRepositorio, IUserIdService userIdService, ILogger<RecetaService> logger)
         {
             _recetaRepositorio = recetaRepositorio;
             _logger = logger;
+            _userIdService = userIdService;
+            _usuarioRecetaRepositorio = usuarioRecetaRepositorio;
+            _recetaIngredienteRepositorio = recetaIngredienteRepositorio;
         }
 
         public IEnumerable<Receta> GetAll()
@@ -25,7 +31,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_RECETAS);
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_RECETAS);
                 throw;
             }
         }
@@ -39,7 +45,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_RECETA_ID, id);
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_RECETA_ID, id);
                 throw;
             }
         }
@@ -53,7 +59,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_RECETAS_COMPLETAS);
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_RECETAS_COMPLETAS);
                 throw;
             }
         }
@@ -67,7 +73,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_RECETA_COMPLETA_ID, id);
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_RECETA_COMPLETA_ID, id);
                 throw;
             }
         }
@@ -76,12 +82,14 @@ namespace CookingAPI.Services
         {
             try
             {
+
                 _logger.LogInformation(Mensajes.Logs.AÑADIR_RECETA, receta.Nombre);
-                _recetaRepositorio.Add(receta);
+                _usuarioRecetaRepositorio.CrearReceta(receta);
+
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_AÑADIR_RECETA, receta.Nombre);
+                _logger.LogError(ex, Mensajes.Error.ERROR_AÑADIR_RECETA, receta.Nombre);
                 throw;
             }
         }
@@ -95,7 +103,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_ACTUALIZAR_RECETA, id);
+                _logger.LogError(ex, Mensajes.Error.ERROR_ACTUALIZAR_RECETA, id);
                 throw;
             }
         }
@@ -109,7 +117,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_ELIMINAR_RECETA, id);
+                _logger.LogError(ex, Mensajes.Error.ERROR_ELIMINAR_RECETA, id);
                 throw;
             }
         }
@@ -123,7 +131,7 @@ namespace CookingAPI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_BUSQUEDA_RECETAS);
+                _logger.LogError(ex, Mensajes.Error.ERROR_BUSQUEDA_RECETAS);
                 throw;
             }
         }

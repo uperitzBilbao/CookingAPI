@@ -26,7 +26,7 @@ namespace CookingAPI.Repositorio
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_ENTIDAD, typeof(TEntity).Name, id);
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_ENTIDAD, typeof(TEntity).Name, id);
                 throw;
             }
         }
@@ -41,7 +41,7 @@ namespace CookingAPI.Repositorio
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_OBTENER_TODAS, typeof(TEntity).Name);
+                _logger.LogError(ex, Mensajes.Error.ERROR_OBTENER_TODAS, typeof(TEntity).Name);
                 throw;
             }
         }
@@ -56,7 +56,7 @@ namespace CookingAPI.Repositorio
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_AGREGAR_ENTIDAD, typeof(TEntity).Name);
+                _logger.LogError(ex, Mensajes.Error.ERROR_AGREGAR_ENTIDAD, typeof(TEntity).Name);
                 throw;
             }
         }
@@ -71,7 +71,7 @@ namespace CookingAPI.Repositorio
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_ACTUALIZAR_ENTIDAD, typeof(TEntity).Name, id);
+                _logger.LogError(ex, Mensajes.Error.ERROR_ACTUALIZAR_ENTIDAD, typeof(TEntity).Name, id);
                 throw;
             }
         }
@@ -93,7 +93,7 @@ namespace CookingAPI.Repositorio
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, Mensajes.Logs.ERROR_ELIMINAR_ENTIDAD, typeof(TEntity).Name, id);
+                _logger.LogError(ex, Mensajes.Error.ERROR_ELIMINAR_ENTIDAD, typeof(TEntity).Name, id);
                 throw;
             }
         }

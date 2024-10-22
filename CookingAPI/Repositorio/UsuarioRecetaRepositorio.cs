@@ -22,13 +22,13 @@ namespace CookingAPI.Repositorio
         public void CrearReceta(Receta receta)
         {
             var userId = _userIdService.GetUserId();
-            if (userId == 0)
+            if (userId == 0 || userId == null)
             {
                 _logger.LogError(Mensajes.Error.ERROR_USERID_NO_ENCONTRADO);
                 throw new Exception(Mensajes.Error.ERROR_NO_AUTENTICADO);
             }
 
-            receta.IdReceta = 0; // Asegurarse de que es una receta nueva
+
 
             _context.Recetas.Add(receta);
             _context.SaveChanges();

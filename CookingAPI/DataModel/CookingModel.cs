@@ -1,4 +1,5 @@
-﻿using CookingAPI.Models;
+﻿using CookingAPI.Constantes;
+using CookingAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CookingAPI.DataModel
@@ -13,6 +14,7 @@ namespace CookingAPI.DataModel
         }
 
         public DbSet<Ingrediente> Ingredientes { get; set; }
+        public DbSet<IngredienteAlergeno> IngredienteAlergenos { get; set; }
         public DbSet<Receta> Recetas { get; set; }
         public DbSet<RecetaIngrediente> RecetaIngredientes { get; set; }
         public DbSet<TipoDieta> TiposDieta { get; set; }
@@ -24,6 +26,24 @@ namespace CookingAPI.DataModel
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<IngredienteAlergeno>()
+                .Property(ur => ur.Id)
+                .ValueGeneratedOnAdd();
+            modelBuilder.Entity<IngredienteAlergeno>()
+                .HasKey(ri => new { ri.IdIngrediente, ri.IdTipoAlergeno });
+            modelBuilder.Entity<IngredienteAlergeno>()
+                .HasOne(ri => ri.Ingrediente)
+                .WithMany()
+                .HasForeignKey(ri => ri.IdIngrediente);
+
+            modelBuilder.Entity<IngredienteAlergeno>()
+                .HasOne(ri => ri.Ingrediente)
+                .WithMany(r => r.IngredienteAlergenos)
+                .HasForeignKey(ri => ri.IdTipoAlergeno);
+
+            modelBuilder.Entity<RecetaIngrediente>()
+                .Property(ur => ur.Id)
+                .ValueGeneratedOnAdd();
             // Configuración de la relación entre Receta y RecetaIngrediente
             modelBuilder.Entity<RecetaIngrediente>()
                 .HasKey(ri => new { ri.IdReceta, ri.IdIngrediente });
@@ -64,6 +84,10 @@ namespace CookingAPI.DataModel
                 .HasOne(ur => ur.Receta)
                 .WithMany(r => r.UsuarioRecetas)
                 .HasForeignKey(ur => ur.RecetaId);
+
+            modelBuilder.Entity<UsuarioReceta>()
+                .Property(ur => ur.Id)
+                .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Usuario>()
                 .HasKey(u => u.Id);
@@ -145,7 +169,7 @@ namespace CookingAPI.DataModel
             );
 
             // Log the database initialization
-            _logger.LogInformation("CookingModel inicializado y cargando datos.");
+            _logger.LogInformation(Mensajes.Informacion.INICIALIZANDO);
         }
     }
 }

@@ -212,7 +212,10 @@ namespace CookingAPI.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.HasKey("UsuarioId", "RecetaId");
 
@@ -233,7 +236,10 @@ namespace CookingAPI.Migrations
                         .HasColumnType("real");
 
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.HasKey("IdReceta", "IdIngrediente");
 

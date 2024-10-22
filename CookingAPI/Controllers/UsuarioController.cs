@@ -2,10 +2,10 @@
 using CookingAPI.InterfacesService;
 using CookingAPI.Models;
 using CookingAPI.Repositorio;
+using CookingAPI.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -68,7 +68,7 @@ namespace CookingAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_SERVIDOR, Detail = ex.Message });
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Error.ERROR_SERVIDOR, Detail = ex.Message });
             }
         }
 
@@ -120,28 +120,8 @@ namespace CookingAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ProblemDetails { Title = Mensajes.Logs.ERROR_CERRAR_SESION, Detail = ex.Message });
+                return StatusCode(500, new ProblemDetails { Title = Mensajes.Error.ERROR_CERRAR_SESION, Detail = ex.Message });
             }
         }
-    }
-
-    public class LoginRequest
-    {
-        [Required]
-        [StringLength(50, MinimumLength = 3)]
-        public string Username { get; set; }
-
-        [Required]
-        [StringLength(100, MinimumLength = 6)]
-        public string Password { get; set; }
-    }
-
-    public class RegisterRequest
-    {
-        [Required]
-        public string Username { get; set; }
-
-        [Required]
-        public string Password { get; set; }
     }
 }
