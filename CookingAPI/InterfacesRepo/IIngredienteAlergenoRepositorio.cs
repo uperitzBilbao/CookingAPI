@@ -9,5 +9,6 @@ namespace CookingAPI.InterfacesRepo
         IEnumerable<IngredienteAlergeno> GetAll();
         void Update(IngredienteAlergeno ingredienteAlergeno);
         void Delete(int id);
+        void DeleteByIngrediente(int idIngrediente);
     }
 }

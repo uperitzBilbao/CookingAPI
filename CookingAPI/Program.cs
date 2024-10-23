@@ -48,6 +48,11 @@ namespace CookingAPI
             builder.Services.AddScoped<IRecetaRepositorio, RecetaRepositorio>();
             builder.Services.AddScoped<IRecetaIngredienteRepositorio, RecetaIngredienteRepositorio>();
             builder.Services.AddScoped<IIngredienteRepositorio, IngredienteRepositorio>();
+            builder.Services.AddScoped<IIngredienteAlergenoRepositorio, IngredienteAlergenoRepositorio>();
+            builder.Services.AddScoped<ITipoIngredienteRepositorio, TipoIngredienteRepositorio>();
+            builder.Services.AddScoped<ITipoDietaRepositorio, TipoDietaRepositorio>();
+            builder.Services.AddScoped<ITipoElaboracionRepositorio, TipoElaboracionRepositorio>();
+            builder.Services.AddScoped<ITipoAlergenoRepositorio, TipoAlergenoRepositorio>();
 
             // Registro de servicios
             builder.Services.AddScoped<IRecetaService, RecetaService>();

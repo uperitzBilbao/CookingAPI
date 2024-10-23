@@ -156,31 +156,32 @@ namespace CookingAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "IngredienteAlergeno",
+                name: "IngredienteAlergenos",
                 columns: table => new
                 {
                     IdIngrediente = table.Column<int>(type: "int", nullable: false),
                     IdTipoAlergeno = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     TipoAlergenoIdTipoAlergeno = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_IngredienteAlergeno", x => new { x.IdIngrediente, x.IdTipoAlergeno });
+                    table.PrimaryKey("PK_IngredienteAlergenos", x => new { x.IdIngrediente, x.IdTipoAlergeno });
                     table.ForeignKey(
-                        name: "FK_IngredienteAlergeno_Ingredientes_IdIngrediente",
+                        name: "FK_IngredienteAlergenos_Ingredientes_IdIngrediente",
                         column: x => x.IdIngrediente,
                         principalTable: "Ingredientes",
                         principalColumn: "IdIngrediente",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_IngredienteAlergeno_TiposAlergeno_IdTipoAlergeno",
+                        name: "FK_IngredienteAlergenos_TiposAlergeno_IdTipoAlergeno",
                         column: x => x.IdTipoAlergeno,
                         principalTable: "TiposAlergeno",
                         principalColumn: "IdTipoAlergeno",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_IngredienteAlergeno_TiposAlergeno_TipoAlergenoIdTipoAlergeno",
+                        name: "FK_IngredienteAlergenos_TiposAlergeno_TipoAlergenoIdTipoAlergeno",
                         column: x => x.TipoAlergenoIdTipoAlergeno,
                         principalTable: "TiposAlergeno",
                         principalColumn: "IdTipoAlergeno");
@@ -313,13 +314,13 @@ namespace CookingAPI.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_IngredienteAlergeno_IdTipoAlergeno",
-                table: "IngredienteAlergeno",
+                name: "IX_IngredienteAlergenos_IdTipoAlergeno",
+                table: "IngredienteAlergenos",
                 column: "IdTipoAlergeno");
 
             migrationBuilder.CreateIndex(
-                name: "IX_IngredienteAlergeno_TipoAlergenoIdTipoAlergeno",
-                table: "IngredienteAlergeno",
+                name: "IX_IngredienteAlergenos_TipoAlergenoIdTipoAlergeno",
+                table: "IngredienteAlergenos",
                 column: "TipoAlergenoIdTipoAlergeno");
 
             migrationBuilder.CreateIndex(
@@ -352,7 +353,7 @@ namespace CookingAPI.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "IngredienteAlergeno");
+                name: "IngredienteAlergenos");
 
             migrationBuilder.DropTable(
                 name: "RecetaIngredientes");

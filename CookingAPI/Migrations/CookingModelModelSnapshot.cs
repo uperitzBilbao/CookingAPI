@@ -103,7 +103,10 @@ namespace CookingAPI.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("TipoAlergenoIdTipoAlergeno")
                         .HasColumnType("int");
@@ -114,7 +117,7 @@ namespace CookingAPI.Migrations
 
                     b.HasIndex("TipoAlergenoIdTipoAlergeno");
 
-                    b.ToTable("IngredienteAlergeno");
+                    b.ToTable("IngredienteAlergenos");
                 });
 
             modelBuilder.Entity("CookingAPI.Models.Receta", b =>

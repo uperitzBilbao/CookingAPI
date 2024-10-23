@@ -1,4 +1,5 @@
-﻿namespace CookingAPI.Constantes
+﻿
+namespace CookingAPI.Constantes
 {
     public class Mensajes
     {
@@ -51,7 +52,7 @@
             public const string ERROR_CERRAR_SESION = "Error al cerrar sesión.";
             public const string ERROR_CREAR_RECETA_USUARIO = "Error al crear la receta para el usuario.";
             public const string ERROR_MIGRACIONES = "Error al aplicar las migraciones.";
-
+            public const string ERROR_ALERGENO_NO_RECONOCIDO = "El alergeno no reconocido: ";
         }
 
         public class Logs

@@ -3,6 +3,7 @@ using CookingAPI.InterfacesRepo;
 using CookingAPI.InterfacesService;
 using CookingAPI.Models;
 using CookingAPI.Requests;
+using CookingAPI.Responses;
 
 namespace CookingAPI.Services
 {
@@ -21,12 +22,32 @@ namespace CookingAPI.Services
             _logger = logger;
         }
 
-        public IEnumerable<Ingrediente> GetAll()
+        public IEnumerable<IngredienteResponse> GetAll()
         {
             try
             {
                 _logger.LogInformation(Mensajes.Logs.OBTENER_INGREDIENTES);
-                return _ingredienteRepositorio.GetAll();
+                var lista = _ingredienteRepositorio.GetAll();
+                List<IngredienteResponse> listaRespuesta = new List<IngredienteResponse>();
+                foreach (Ingrediente i in lista)
+                {
+                    var response = new IngredienteResponse();
+                    response.Nombre = i.Nombre + " (Tipo: " + i.TipoIngrediente + ")";
+
+                    if (i.IngredienteAlergenos.Count != 0)
+                    {
+
+                        response.Nombre.Concat("[Alérgenos:");
+                        foreach (IngredienteAlergeno ia in i.IngredienteAlergenos)
+                        {
+                            var alergeno = _tipoAlergenoRepositorio.GetById(ia.IdTipoAlergeno);
+                            response.Nombre.Concat(" " + alergeno.Nombre);
+                        }
+                        response.Nombre.Concat("]");
+                    }
+                    listaRespuesta.Add(response);
+                }
+                return listaRespuesta;
             }
             catch (Exception ex)
             {
@@ -35,12 +56,35 @@ namespace CookingAPI.Services
             }
         }
 
-        public Ingrediente? Get(int id)
+        public IngredienteResponse? Get(int id)
         {
             try
             {
                 _logger.LogInformation(Mensajes.Logs.OBTENER_INGREDIENTE_ID, id);
-                return _ingredienteRepositorio.Get(id);
+                var ingrediente = _ingredienteRepositorio.Get(id);
+                var response = new IngredienteResponse();
+
+                if (ingrediente != null)
+                {
+
+
+                    response.Nombre = ingrediente.Nombre + " (Tipo: " + ingrediente.TipoIngrediente + ")";
+
+                    if (ingrediente.IngredienteAlergenos.Count != 0)
+                    {
+
+                        response.Nombre.Concat("[Alérgenos:");
+                        foreach (IngredienteAlergeno ia in ingrediente.IngredienteAlergenos)
+                        {
+                            var alergeno = _tipoAlergenoRepositorio.GetById(ia.IdTipoAlergeno);
+                            response.Nombre.Concat(" " + alergeno.Nombre);
+                        }
+                        response.Nombre.Concat("]");
+                    }
+
+                }
+
+                return response;
             }
             catch (Exception ex)
             {
@@ -65,12 +109,22 @@ namespace CookingAPI.Services
                 foreach (string alergeno in request.Alergenos)
                 {
                     var idAlergeno = _tipoAlergenoRepositorio.GetByNombre(alergeno);
-                    var nuevoIngredienteAlergeno = new IngredienteAlergeno
+                    var tipo = _tipoAlergenoRepositorio.GetByNombre(alergeno);
+                    if (tipo != null)
                     {
-                        IdTipoAlergeno = _tipoAlergenoRepositorio.GetByNombre(alergeno).IdTipoAlergeno,
-                        IdIngrediente = nuevo.IdIngrediente
-                    };
-                    _ingredienteAlergenoRepositorio.Add(nuevoIngredienteAlergeno);
+                        var nuevoIngredienteAlergeno = new IngredienteAlergeno
+                        {
+                            IdTipoAlergeno = tipo.IdTipoAlergeno,
+                            IdIngrediente = nuevo.IdIngrediente
+                        };
+
+                        _ingredienteAlergenoRepositorio.Add(nuevoIngredienteAlergeno);
+                    }
+                    else
+                    {
+                        _logger.LogError(Mensajes.Error.ERROR_ALERGENO_NO_RECONOCIDO + alergeno);
+                    }
+
                 }
 
             }
@@ -92,10 +146,32 @@ namespace CookingAPI.Services
                     IdIngrediente = request.IdTipoIngrediente,
                 };
 
-                _logger.LogInformation(Mensajes.Logs.AÑADIR_INGREDIENTE, nuevo.Nombre);
-                _ingredienteRepositorio.Add(nuevo);
+                _logger.LogInformation(Mensajes.Logs.ACTUALIZAR_INGREDIENTE, id);
+                _ingredienteRepositorio.Update(id, nuevo);
 
+                //Borrar los registros de la tabla intermedia para volver a introducir los nuevos.
+                _ingredienteAlergenoRepositorio.DeleteByIngrediente(request.IdTipoIngrediente);
 
+                foreach (string alergeno in request.Alergenos)
+                {
+                    var idAlergeno = _tipoAlergenoRepositorio.GetByNombre(alergeno);
+                    var tipo = _tipoAlergenoRepositorio.GetByNombre(alergeno);
+                    if (tipo != null)
+                    {
+                        var nuevoIngredienteAlergeno = new IngredienteAlergeno
+                        {
+                            IdTipoAlergeno = tipo.IdTipoAlergeno,
+                            IdIngrediente = nuevo.IdIngrediente
+                        };
+
+                        _ingredienteAlergenoRepositorio.Add(nuevoIngredienteAlergeno);
+                    }
+                    else
+                    {
+                        _logger.LogError(Mensajes.Error.ERROR_ALERGENO_NO_RECONOCIDO + alergeno);
+                    }
+
+                }
 
 
                 _logger.LogInformation(Mensajes.Logs.ACTUALIZAR_INGREDIENTE, id);

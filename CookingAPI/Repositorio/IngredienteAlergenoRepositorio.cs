@@ -47,5 +47,20 @@ namespace CookingAPI.Repositorio
                 _context.SaveChanges();
             }
         }
+        public void DeleteByIngrediente(int idIngrediente)
+        {
+            // Obtener todos los registros que coinciden con el IdIngrediente
+            var ingredientesAlergenos = _context.IngredienteAlergenos
+                                                 .Where(ia => ia.IdIngrediente == idIngrediente)
+                                                 .ToList();
+
+            // Eliminar cada registro encontrado
+            if (ingredientesAlergenos.Any())
+            {
+                _context.IngredienteAlergenos.RemoveRange(ingredientesAlergenos);
+                _context.SaveChanges();
+            }
+        }
+
     }
 }

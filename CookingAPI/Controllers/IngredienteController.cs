@@ -2,6 +2,7 @@
 using CookingAPI.InterfacesService;
 using CookingAPI.Models;
 using CookingAPI.Requests;
+using CookingAPI.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,7 +24,7 @@ namespace CookingAPI.Controllers
 
         // GET: api/ingrediente
         [HttpGet]
-        public ActionResult<List<Ingrediente>> GetAll()
+        public ActionResult<List<IngredienteResponse>> GetAll()
         {
             try
             {
@@ -39,7 +40,7 @@ namespace CookingAPI.Controllers
 
         // GET: api/ingrediente/{id}
         [HttpGet("{id}")]
-        public ActionResult<Ingrediente> Get(int id)
+        public ActionResult<IngredienteResponse> Get(int id)
         {
             try
             {
